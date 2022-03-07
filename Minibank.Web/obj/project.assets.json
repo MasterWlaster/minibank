@@ -75,6 +75,29 @@
         "frameworkReferences": [
           "Microsoft.AspNetCore.App"
         ]
+      },
+      "Minibank.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "compile": {
+          "bin/placeholder/Minibank.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Minibank.Core.dll": {}
+        }
+      },
+      "Minibank.Data/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "dependencies": {
+          "Minibank.Core": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Minibank.Data.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Minibank.Data.dll": {}
+        }
       }
     }
   },
@@ -185,10 +208,22 @@
         "swashbuckle.aspnetcore.swaggerui.5.6.3.nupkg.sha512",
         "swashbuckle.aspnetcore.swaggerui.nuspec"
       ]
+    },
+    "Minibank.Core/1.0.0": {
+      "type": "project",
+      "path": "../Minibank.Core/Minibank.Core.csproj",
+      "msbuildProject": "../Minibank.Core/Minibank.Core.csproj"
+    },
+    "Minibank.Data/1.0.0": {
+      "type": "project",
+      "path": "../Minibank.Data/Minibank.Data.csproj",
+      "msbuildProject": "../Minibank.Data/Minibank.Data.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net5.0": [
+      "Minibank.Core >= 1.0.0",
+      "Minibank.Data >= 1.0.0",
       "Swashbuckle.AspNetCore >= 5.6.3"
     ]
   },
@@ -222,7 +257,14 @@
       "frameworks": {
         "net5.0": {
           "targetAlias": "net5.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\Admin\\Desktop\\web\\GIT reps\\Minibank\\Minibank.Core\\Minibank.Core.csproj": {
+              "projectPath": "C:\\Users\\Admin\\Desktop\\web\\GIT reps\\Minibank\\Minibank.Core\\Minibank.Core.csproj"
+            },
+            "C:\\Users\\Admin\\Desktop\\web\\GIT reps\\Minibank\\Minibank.Data\\Minibank.Data.csproj": {
+              "projectPath": "C:\\Users\\Admin\\Desktop\\web\\GIT reps\\Minibank\\Minibank.Data\\Minibank.Data.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
