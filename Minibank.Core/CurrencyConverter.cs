@@ -16,7 +16,7 @@ namespace Minibank.Core
             _exchangeRateProvider = excangeRateProvider;
         }
 
-        public float Convert(int value, string fromCurrency, string toCurrency)
+        public float Convert(int value, string fromCurrency, string intoCurrency)
         {
             if (value < 0)
             {
@@ -26,7 +26,7 @@ namespace Minibank.Core
             return 
                 value * 
                 _exchangeRateProvider.RateOf(fromCurrency) / 
-                _exchangeRateProvider.RateOf(toCurrency);
+                _exchangeRateProvider.RateOf(intoCurrency);
         }
     }
 }

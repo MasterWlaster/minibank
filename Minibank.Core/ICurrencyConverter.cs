@@ -8,8 +8,8 @@ namespace Minibank.Core
 {
     public interface ICurrencyConverter
     {
-        /// <param name="from">Сurrency code to convert from</param>
-        /// <param name="to">Currency code to convert into</param>
-        float Convert(int value, string fromCurrency, string toCurrency);
+        /// <param name="fromCurrency">Сurrency code to convert from</param>
+        /// <param name="intoCurrency">Currency code to convert into</param>
+        float Convert(int value, string fromCurrency, string intoCurrency);
     }
 }
