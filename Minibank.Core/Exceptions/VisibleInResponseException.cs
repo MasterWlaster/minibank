@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Minibank.Core.Exceptions
 {
-    public class UserFriendlyException : Exception
+    public class VisibleInResponseException : Exception
     {
-        public UserFriendlyException(string message) : base(message)
+        public VisibleInResponseException(string message) : base(message)
         {
             
         }

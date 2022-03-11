@@ -16,11 +16,11 @@ namespace Minibank.Core
             _exchangeRateProvider = excangeRateProvider;
         }
 
-        public float Convert(int value, string fromCurrency, string intoCurrency)
+        public decimal Convert(int value, string fromCurrency, string intoCurrency)
         {
             if (value < 0)
             {
-                throw new UserFriendlyException("Cannot convert negative value");
+                throw new VisibleInResponseException("Cannot convert negative value");
             }
 
             return 

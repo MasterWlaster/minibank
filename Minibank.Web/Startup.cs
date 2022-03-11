@@ -50,7 +50,7 @@ namespace Minibank.Web
             }
 
             app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMiddleware<UserFriendlyExceptionMiddleware>();
+            app.UseMiddleware<VisibleInResponseExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 

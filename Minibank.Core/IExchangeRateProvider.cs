@@ -8,6 +8,6 @@ namespace Minibank.Core
 {
     public interface IExchangeRateProvider
     {
-        float RateOf(string currencyCode);
+        decimal RateOf(string currencyCode);
     }
 }

@@ -16,13 +16,13 @@ namespace Minibank.Data
             _random = new Random();
         }
 
-        public float RateOf(string currencyCode)
+        public decimal RateOf(string currencyCode)
         {
-            switch (currencyCode)
+            switch (currencyCode.Trim().ToLower())
             {
-                case "RUB":
+                case "rub":
                     return 1;
-                case "USD":
+                case "usd":
                     return _random.Next(30, 150);
             }
 

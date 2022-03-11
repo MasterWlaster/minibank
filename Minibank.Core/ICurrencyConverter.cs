@@ -10,6 +10,6 @@ namespace Minibank.Core
     {
         /// <param name="fromCurrency">Сurrency code to convert from</param>
         /// <param name="intoCurrency">Currency code to convert into</param>
-        float Convert(int value, string fromCurrency, string intoCurrency);
+        decimal Convert(int value, string fromCurrency, string intoCurrency);
     }
 }
