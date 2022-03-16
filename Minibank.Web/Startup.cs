@@ -13,7 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Minibank.Web.Middlewares;
 using Minibank.Core;
-using Minibank.Data;
+using Minibank.Data.Exchanges;
 
 namespace Minibank.Web
 {
@@ -50,7 +50,7 @@ namespace Minibank.Web
             }
 
             app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMiddleware<VisibleInResponseExceptionMiddleware>();
+            app.UseMiddleware<ValidationExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 

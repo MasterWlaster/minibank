@@ -20,7 +20,7 @@ namespace Minibank.Core
         {
             if (value < 0)
             {
-                throw new VisibleInResponseException("Cannot convert negative value");
+                throw new ValidationException("Cannot convert negative value");
             }
 
             return 
