@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Minibank.Core.Exceptions;
 using Minibank.Data.Exchanges.Models;
 using Minibank.Core.Exchanges;
 
@@ -38,7 +39,7 @@ namespace Minibank.Data.Exchanges
                 return response.Code2Info[currencyCode].Value;
             }
 
-            throw new Exception("Unknown currency code");
+            throw new ValidationException("Unknown currency code");
         }
     }
 }

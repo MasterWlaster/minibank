@@ -28,7 +28,7 @@ namespace Minibank.Core.Domains.Accounts.Services
         {
             if (fromAccountId == toAccountId)
             {
-                throw new Exception("accounts are equals");
+                throw new ValidationException("accounts are equals");
             }
 
             var fromAccount = _accountRepository.Get(fromAccountId);
@@ -73,6 +73,11 @@ namespace Minibank.Core.Domains.Accounts.Services
             var commission = CalculateCommission(amount, fromAccountId, toAccountId);
             var fromAccount = _accountRepository.Get(fromAccountId);
             var toAccount = _accountRepository.Get(toAccountId);
+
+            if (fromAccount.Money - amount < 0)
+            {
+                throw new ValidationException("not enough money");
+            }
 
             _accountRepository.Update(
                 fromAccount.Id,
