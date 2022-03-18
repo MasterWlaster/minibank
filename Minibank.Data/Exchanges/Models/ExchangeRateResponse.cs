@@ -8,7 +8,7 @@ namespace Minibank.Data.Exchanges.Models
 {
     public class ExchangeRateResponse
     {
-        public Dictionary<string, CurrencyInfo> Code2Info { get; set; }
+        public Dictionary<string, CurrencyInfo> Valute { get; set; }
     }
 
     public class CurrencyInfo

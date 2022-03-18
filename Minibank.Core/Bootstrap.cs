@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Minibank.Core.Domains.Accounts.Services;
 using Minibank.Core.Domains.Transfers.Services;
 using Minibank.Core.Domains.Users.Services;
+using Minibank.Core.Exchanges;
 
 namespace Minibank.Core
 {
@@ -17,6 +18,7 @@ namespace Minibank.Core
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IAccountService, AccountService>();
             services.AddSingleton<ITransferService, TransferService>();
+            services.AddScoped<ICurrencyConverter, CurrencyConverter>();
 
             return services;
         }

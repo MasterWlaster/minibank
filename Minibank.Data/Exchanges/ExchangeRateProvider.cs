@@ -28,15 +28,20 @@ namespace Minibank.Data.Exchanges
 
         private decimal rateOf(string currencyCode)
         {
+            if (currencyCode == "RUB")
+            {
+                return 1;
+            }
+            
             var httpClient = _httpClientFactory.CreateClient();
             var response = httpClient
                 .GetFromJsonAsync<ExchangeRateResponse>("https://www.cbr-xml-daily.ru/daily_json.js")
                 .GetAwaiter()
                 .GetResult();
 
-            if (response.Code2Info.ContainsKey(currencyCode))
+            if (response.Valute.ContainsKey(currencyCode))
             {
-                return response.Code2Info[currencyCode].Value;
+                return response.Valute[currencyCode].Value;
             }
 
             throw new ValidationException("Unknown currency code");
