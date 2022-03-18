@@ -16,7 +16,7 @@ namespace Minibank.Core.Exchanges
             _exchangeRateProvider = excangeRateProvider;
         }
 
-        public decimal Convert(int value, string fromCurrency, string intoCurrency)
+        public decimal Convert(decimal value, string fromCurrency, string intoCurrency)
         {
             if (value < 0)
             {

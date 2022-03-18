@@ -8,6 +8,7 @@ using Minibank.Core.Helpers;
 using Minibank.Core.Domains.Accounts.Repositories;
 using Minibank.Core.Domains.Transfers.Services;
 using Minibank.Core.Domains.Users.Services;
+using Minibank.Core.Exchanges;
 
 namespace Minibank.Core.Domains.Accounts.Services
 {
@@ -16,12 +17,14 @@ namespace Minibank.Core.Domains.Accounts.Services
         private readonly IAccountRepository _accountRepository;
         private readonly ITransferService _transferService;
         private readonly IUserService _userService;
+        private readonly ICurrencyConverter _currencyConverter;
 
-        public AccountService(IAccountRepository accountRepository, ITransferService transferService, IUserService userService)
+        public AccountService(IAccountRepository accountRepository, ITransferService transferService, IUserService userService, ICurrencyConverter currencyConverter)
         {
             _accountRepository = accountRepository;
             _transferService = transferService;
             _userService = userService;
+            _currencyConverter = currencyConverter;
         }
 
         public decimal CalculateCommission(decimal amount, int fromAccountId, int toAccountId)
@@ -34,10 +37,7 @@ namespace Minibank.Core.Domains.Accounts.Services
             var fromAccount = _accountRepository.Get(fromAccountId);
             var toAccount = _accountRepository.Get(toAccountId);
             
-            if (
-                fromAccount.IsActive &&
-                toAccount.IsActive &&
-                fromAccount.CurrencyCode == toAccount.CurrencyCode)
+            if (fromAccount.IsActive && toAccount.IsActive)
             {
                 if (fromAccount.UserId == toAccount.UserId)
                 {
@@ -46,7 +46,7 @@ namespace Minibank.Core.Domains.Accounts.Services
                 return Decimal.Round(amount * 0.02m, 2);
             }
 
-            throw new Exception("accounts not active or of different currencies");
+            throw new Exception("accounts not active");
         }
 
         public void Close(int id)
@@ -82,6 +82,10 @@ namespace Minibank.Core.Domains.Accounts.Services
             _accountRepository.Update(
                 fromAccount.Id,
                 new() { Money = fromAccount.Money - amount });
+
+            commission = _currencyConverter.Convert(commission, fromAccount.CurrencyCode, toAccount.CurrencyCode);
+            amount = _currencyConverter.Convert(amount, fromAccount.CurrencyCode, toAccount.CurrencyCode);
+
             _accountRepository.Update(
                 toAccount.Id,
                 new() { Money = toAccount.Money + amount - commission });
