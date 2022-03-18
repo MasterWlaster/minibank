@@ -13,9 +13,9 @@ namespace Minibank.Data.Users.Helpers
         {
             return new()
             {
-                Id = (int) user?.Id,
-                Login = user?.Login,
-                Email = user?.Email,
+                Id = user.Id,
+                Login = user.Login,
+                Email = user.Email,
             };
         }
 
@@ -23,9 +23,9 @@ namespace Minibank.Data.Users.Helpers
         {
             return new()
             {
-                Id = (int) user?.Id,
-                Login = user?.Login,
-                Email = user?.Email,
+                Id = user.Id,
+                Login = user.Login,
+                Email = user.Email,
             };
         }
     }

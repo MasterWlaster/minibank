@@ -12,9 +12,9 @@ namespace Minibank.Web.Dto.Mapping
         {
             return new()
             {
-                Id = (int)model?.Id,
-                UserId = (int)model?.UserId,
-                CurrencyCode = model?.CurrencyCode,
+                Id = model.Id,
+                UserId = model.UserId,
+                CurrencyCode = model.CurrencyCode,
             };
         }
 
@@ -22,9 +22,9 @@ namespace Minibank.Web.Dto.Mapping
         {
             return new()
             {
-                Id = (int)model?.Id,
-                UserId = (int)model?.UserId,
-                CurrencyCode = model?.CurrencyCode,
+                Id = model.Id,
+                UserId = model.UserId,
+                CurrencyCode = model.CurrencyCode,
             };
         }
     }

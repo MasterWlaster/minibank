@@ -19,24 +19,46 @@ namespace Minibank.Web.Controllers
             _accountService = accountService;
         }
 
+        /// <summary>
+        /// Create
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="currencyCode"></param>
         [HttpPost]
         public void Create(int userId, string currencyCode)
         {
             _accountService.Create(userId, currencyCode);
         }
 
+        /// <summary>
+        /// Close
+        /// </summary>
+        /// <param name="id"></param>
         [HttpDelete]
         public void Close(int id)
         {
             _accountService.Close(id);
         }
 
+        /// <summary>
+        /// Calculate Commission
+        /// </summary>
+        /// <param name="money"></param>
+        /// <param name="fromAccountId"></param>
+        /// <param name="toAccountId"></param>
+        /// <returns></returns>
         [HttpGet]
         public decimal CalculateCommission(decimal money, int fromAccountId, int toAccountId)
         {
             return _accountService.CalculateCommission(money, fromAccountId, toAccountId);
         }
 
+        /// <summary>
+        /// Do Transfer
+        /// </summary>
+        /// <param name="money"></param>
+        /// <param name="fromAccountId"></param>
+        /// <param name="toAccountId"></param>
         [HttpPut]
         public void DoTransfer(decimal money, int fromAccountId, int toAccountId)
         {

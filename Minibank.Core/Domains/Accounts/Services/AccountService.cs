@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Minibank.Core.Exceptions;
 using Minibank.Core.Helpers;
 using Minibank.Core.Domains.Accounts.Repositories;
 using Minibank.Core.Domains.Transfers.Services;
@@ -60,7 +61,7 @@ namespace Minibank.Core.Domains.Accounts.Services
 
             if (currency != "RUB" || currency != "USD" || currency != "EUR")
             {
-                throw new Exception("invalid currency");
+                throw new ValidationException("invalid currency");
             }
 
             return _accountRepository.Create(userId, currencyCode);
