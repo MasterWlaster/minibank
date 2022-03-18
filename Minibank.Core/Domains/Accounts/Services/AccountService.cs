@@ -60,7 +60,7 @@ namespace Minibank.Core.Domains.Accounts.Services
 
             var currency = Currency.Normalize(currencyCode);
 
-            if (currency != "RUB" || currency != "USD" || currency != "EUR")
+            if (currency != "RUB" && currency != "USD" && currency != "EUR")
             {
                 throw new ValidationException("invalid currency");
             }
