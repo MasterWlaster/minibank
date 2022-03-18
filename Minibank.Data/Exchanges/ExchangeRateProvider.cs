@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Minibank.Data.Exchanges.Models;
-using Minibank.Core;
+using Minibank.Core.Exchanges;
 
 namespace Minibank.Data.Exchanges
 {

@@ -37,7 +37,7 @@ namespace Minibank.Web.Controllers
             return _accountService.CalculateCommission(money, fromAccountId, toAccountId);
         }
 
-        [HttpPost]
+        [HttpPut]
         public void DoTransfer(decimal money, int fromAccountId, int toAccountId)
         {
             _accountService.DoTransfer(money, fromAccountId, toAccountId);
