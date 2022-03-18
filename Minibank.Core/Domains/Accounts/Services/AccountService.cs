@@ -17,10 +17,11 @@ namespace Minibank.Core.Domains.Accounts.Services
         private readonly ITransferService _transferService;
         private readonly IUserService _userService;
 
-        public AccountService(IAccountRepository accountRepository, ITransferService transferService)
+        public AccountService(IAccountRepository accountRepository, ITransferService transferService, IUserService userService)
         {
             _accountRepository = accountRepository;
             _transferService = transferService;
+            _userService = userService;
         }
 
         public decimal CalculateCommission(decimal amount, int fromAccountId, int toAccountId)
