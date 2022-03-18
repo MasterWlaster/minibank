@@ -8,5 +8,9 @@ namespace Minibank.Core.Domains.Accounts.Services
 {
     public interface IAccountService
     {
+        int Create(int userId, string currencyCode);
+        void Close(int id);
+        decimal CalculateCommission(decimal amount, int fromAccountId, int toAccountId);
+        void DoTransfer(decimal amount, int fromAccountId, int toAccountId);
     }
 }

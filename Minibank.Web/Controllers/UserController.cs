@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Minibank.Core.Exceptions;
+using Minibank.Web.Dto.Mapping;
+using Minibank.Core.Domains.Users.Services;
+using Minibank.Web.Dto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Minibank.Web.Controllers
@@ -10,22 +14,29 @@ namespace Minibank.Web.Controllers
     [Route("user")]
     public class UserController : ControllerBase
     {
-        [HttpPost]
-        public void Create()
-        {
+        private readonly IUserService _userService;
 
+        public UserController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
+        [HttpPost]
+        public void Create(UserDto model)
+        {
+            _userService.Create(MapperUser.Map(model));
         }
 
         [HttpPut]
-        public void Edit()
+        public void Update(UserDto model)
         {
-
+            _userService.Update(model.Id, MapperUser.Map(model));
         }
 
         [HttpDelete]
         public void Delete(int id)
         {
-            //todo: check if accounts exist, throw ValidationExceptions
+            _userService.Delete(id);
         }
     }
 }

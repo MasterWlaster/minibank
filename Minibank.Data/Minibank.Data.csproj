@@ -12,4 +12,8 @@
     <ProjectReference Include="..\Minibank.Core\Minibank.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Transfers\Repositories\" />
+  </ItemGroup>
+
 </Project>

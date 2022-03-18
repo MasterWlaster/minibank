@@ -8,5 +8,6 @@ namespace Minibank.Core.Domains.Transfers.Repositories
 {
     public interface ITransferRepository
     {
+        int Create(Transfer data);
     }
 }
