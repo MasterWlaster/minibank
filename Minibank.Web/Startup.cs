@@ -13,7 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Minibank.Web.Middlewares;
 using Minibank.Core;
-using Minibank.Data.Exchanges;
+using Minibank.Data;
 
 namespace Minibank.Web
 {
@@ -35,8 +35,8 @@ namespace Minibank.Web
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Minibank.Web", Version = "v1" });
             });
 
-            services.AddScoped<ICurrencyConverter, CurrencyConverter>();
-            services.AddScoped<IExchangeRateProvider, ExchangeRateProvider>();
+            services.AddCore();
+            services.AddData();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

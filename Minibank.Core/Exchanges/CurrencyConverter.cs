@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Minibank.Core.Exceptions;
 
-namespace Minibank.Core
+namespace Minibank.Core.Exchanges
 {
     public class CurrencyConverter : ICurrencyConverter
     {
