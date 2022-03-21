@@ -15,9 +15,9 @@ namespace Minibank.Core
     {
         public static IServiceCollection AddCore(this IServiceCollection services)
         {
-            services.AddSingleton<IUserService, UserService>();
-            services.AddSingleton<IAccountService, AccountService>();
-            services.AddSingleton<ITransferService, TransferService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<ITransferService, TransferService>();
             services.AddScoped<ICurrencyConverter, CurrencyConverter>();
 
             return services;

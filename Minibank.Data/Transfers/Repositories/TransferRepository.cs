@@ -9,20 +9,22 @@ using Minibank.Core.Domains.Transfers.Repositories;
 
 namespace Minibank.Data.Transfers.Repositories
 {
-    public class TransferRepositoryDefault : ITransferRepository
+    public class TransferRepository : ITransferRepository
     {
         Dictionary<int, TransferDbModel> id2transfer = new();
         int lastId = 0;
         
         public int Create(Transfer data)
         {
-            data.Id = newId();
-            id2transfer[data.Id] = MapperTransferDb.MapDb(data);
+            int id = NewId();
 
-            return lastId;
+            data.Id = id;
+            id2transfer[id] = MapperTransferDb.MapDb(data);
+
+            return id;
         }
 
-        int newId()
+        int NewId()
         {
             return ++lastId;
         }

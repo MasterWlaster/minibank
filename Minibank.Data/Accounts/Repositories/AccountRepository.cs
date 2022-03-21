@@ -12,7 +12,7 @@ using Minibank.Core.Domains.Accounts.Repositories;
 
 namespace Minibank.Data.Accounts.Repositories
 {
-    public class AccountRepositoryDefault : IAccountRepository
+    public class AccountRepository : IAccountRepository
     {
         Dictionary<int, AccountDbModel> id2Account = new();
         Dictionary<int, List<int>> userId2AccountIds = new();
@@ -20,10 +20,12 @@ namespace Minibank.Data.Accounts.Repositories
 
         public int Create(int userId, string currencyCode)
         {
+            int id = NewId();
+
             id2Account.Add(
-                newId(),
+                id,
                 new() { 
-                    Id = lastId,
+                    Id = id,
                     UserId = userId,
                     CurrencyCode = currencyCode,
                     IsActive = true,
@@ -35,14 +37,14 @@ namespace Minibank.Data.Accounts.Repositories
             {
                 userId2AccountIds[userId] = new();
             }
-            userId2AccountIds[userId].Add(lastId);
+            userId2AccountIds[userId].Add(id);
 
-            return lastId;
+            return id;
         }
 
         public void Delete(int id)
         {
-            var account = getModel(id);
+            var account = GetModel(id);
 
             if (account.Money != 0)
             {
@@ -56,30 +58,30 @@ namespace Minibank.Data.Accounts.Repositories
 
         public Account Get(int id)
         {
-            return MapperAccountDb.UnmapDb(getModel(id));
+            return MapperAccountDb.UnmapDb(GetModel(id));
         }
 
         public void Update(int id, Account data)
         {
-            var account = getModel(id);
+            var account = GetModel(id);
 
             account.IsActive = data.IsActive;
             account.Money = data.Money;
             account.CloseDate = data.CloseDate;
         }
 
-        int newId()
+        int NewId()
         {
             return ++lastId;
         }
 
-        AccountDbModel getModel(int id)
+        AccountDbModel GetModel(int id)
         {
             AccountDbModel model;
 
             if (!id2Account.TryGetValue(id, out model))
             {
-                throw new Exception("account not found");
+                throw new ValidationException("account not found");
             }
 
             return model;

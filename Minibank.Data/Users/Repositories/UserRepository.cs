@@ -10,17 +10,19 @@ using Minibank.Core.Exceptions;
 
 namespace Minibank.Data.Users.Repositories
 {
-    public class UserRepositoryDefault : IUserRepository
+    public class UserRepository : IUserRepository
     {
         Dictionary<int, UserDbModel> id2User = new();
         int lastId = 0;
         
-        public int Create(User userInfo)
+        public int Create(User data)
         {
-            userInfo.Id = newId();
-            id2User[userInfo.Id] = MapperUserDb.MapDb(userInfo);
+            int id = NewId();
 
-            return userInfo.Id;
+            data.Id = id;
+            id2User[id] = MapperUserDb.MapDb(data);
+
+            return id;
         }
 
         public void Delete(int id)
@@ -33,33 +35,33 @@ namespace Minibank.Data.Users.Repositories
 
         public User Get(int id)
         {
-            return MapperUserDb.UnmapDb(getModel(id));
+            return MapperUserDb.UnmapDb(GetModel(id));
         }
 
-        public void Update(int id, User userInfo)
+        public void Update(int id, User data)
         {
-            var user = getModel(id);
-            var userData = MapperUserDb.MapDb(userInfo);
+            var user = GetModel(id);
+            var userData = MapperUserDb.MapDb(data);
 
-            user.Login = userData?.Login ?? user?.Login;
-            user.Email = userData?.Email ?? user?.Email;
+            user.Login = userData.Login;
+            user.Email = userData.Email;
         }
 
-        int newId()
+        int NewId()
         {
             return ++lastId;
         }
 
-        UserDbModel getModel(int id)
+        UserDbModel GetModel(int id)
         {
-            UserDbModel user;
+            UserDbModel model;
 
-            if (!id2User.TryGetValue(id, out user))
+            if (!id2User.TryGetValue(id, out model))
             {
                 throw new ValidationException("user not found");
             }
 
-            return user;
+            return model;
         }
     }
 }

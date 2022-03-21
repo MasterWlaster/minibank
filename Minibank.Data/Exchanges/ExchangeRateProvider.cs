@@ -23,10 +23,10 @@ namespace Minibank.Data.Exchanges
 
         public decimal RateOf(string currencyCode)
         {
-            return rateOf(currencyCode.Trim().ToUpper());
+            return GetRate(currencyCode.Trim().ToUpper());
         }
 
-        private decimal rateOf(string currencyCode)
+        decimal GetRate(string currencyCode)
         {
             if (currencyCode == "RUB")
             {

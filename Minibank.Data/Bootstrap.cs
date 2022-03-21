@@ -20,11 +20,11 @@ namespace Minibank.Data
     {
         public static IServiceCollection AddData(this IServiceCollection services)
         {
-            services.AddSingleton<IUserRepository, UserRepositoryDefault>();
-            services.AddSingleton<ITransferRepository, TransferRepositoryDefault>();
-            services.AddSingleton<IAccountRepository, AccountRepositoryDefault>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ITransferRepository, TransferRepository>();
+            services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IExchangeRateProvider, ExchangeRateProvider>();
-            services.AddSingleton<IHttpClientFactory, HttpClientFactory>();
+            services.AddHttpClient<HttpClient>();
             
             return services;
         }

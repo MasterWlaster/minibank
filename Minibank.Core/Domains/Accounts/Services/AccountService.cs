@@ -19,6 +19,9 @@ namespace Minibank.Core.Domains.Accounts.Services
         private readonly IUserService _userService;
         private readonly ICurrencyConverter _currencyConverter;
 
+        const decimal COMMISSION_MULTIPLIER = 0.02m;
+        const int DECIMAL_PLACES = 2;
+
         public AccountService(IAccountRepository accountRepository, ITransferService transferService, IUserService userService, ICurrencyConverter currencyConverter)
         {
             _accountRepository = accountRepository;
@@ -43,7 +46,7 @@ namespace Minibank.Core.Domains.Accounts.Services
                 {
                     return 0;
                 }
-                return Decimal.Round(amount * 0.02m, 2);
+                return Decimal.Round(amount * COMMISSION_MULTIPLIER, DECIMAL_PLACES);
             }
 
             throw new Exception("accounts not active");
@@ -58,9 +61,9 @@ namespace Minibank.Core.Domains.Accounts.Services
         {
             _userService.Get(userId);
 
-            var currency = Currency.Normalize(currencyCode);
+            currencyCode = Currency.Validate(currencyCode);
 
-            if (currency != "RUB" && currency != "USD" && currency != "EUR")
+            if (currencyCode == null)
             {
                 throw new ValidationException("invalid currency");
             }
