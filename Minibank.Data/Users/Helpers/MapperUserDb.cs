@@ -9,7 +9,7 @@ namespace Minibank.Data.Users.Helpers
 {
     public static class MapperUserDb
     {
-        public static UserDbModel MapDb(User user)
+        public static UserDbModel ToUserDbModel(User user)
         {
             return new()
             {
@@ -19,7 +19,7 @@ namespace Minibank.Data.Users.Helpers
             };
         }
 
-        public static User UnmapDb(UserDbModel user)
+        public static User ToUser(UserDbModel user)
         {
             return new()
             {

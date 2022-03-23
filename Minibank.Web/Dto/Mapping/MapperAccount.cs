@@ -8,7 +8,7 @@ namespace Minibank.Web.Dto.Mapping
 {
     public static class MapperAccount
     {
-        public static AccountDto Unmap(Account model)
+        public static AccountDto ToAccountDto(Account model)
         {
             return new()
             {
@@ -18,7 +18,7 @@ namespace Minibank.Web.Dto.Mapping
             };
         }
 
-        public static Account Map(AccountDto model)
+        public static Account ToAccount(AccountDto model)
         {
             return new()
             {

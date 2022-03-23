@@ -9,7 +9,7 @@ namespace Minibank.Data.Accounts.Helpers
 {
     public static class MapperAccountDb
     {
-        public static AccountDbModel MapDb(Account model)
+        public static AccountDbModel ToAccountDbModel(Account model)
         {
             return new()
             {
@@ -23,7 +23,7 @@ namespace Minibank.Data.Accounts.Helpers
             };
         }
 
-        public static Account UnmapDb(AccountDbModel model)
+        public static Account ToAccount(AccountDbModel model)
         {
             return new()
             {

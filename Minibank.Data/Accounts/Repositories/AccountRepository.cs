@@ -58,7 +58,7 @@ namespace Minibank.Data.Accounts.Repositories
 
         public Account Get(int id)
         {
-            return MapperAccountDb.UnmapDb(GetModel(id));
+            return MapperAccountDb.ToAccount(GetModel(id));
         }
 
         public void ChangeMoney(int id, decimal delta)

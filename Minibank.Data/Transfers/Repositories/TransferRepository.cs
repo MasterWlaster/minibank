@@ -19,7 +19,7 @@ namespace Minibank.Data.Transfers.Repositories
             int id = NewId();
 
             data.Id = id;
-            id2transfer[id] = MapperTransferDb.MapDb(data);
+            id2transfer[id] = MapperTransferDb.ToTransferDbModel(data);
 
             return id;
         }

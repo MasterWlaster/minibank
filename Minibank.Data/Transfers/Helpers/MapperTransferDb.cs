@@ -9,7 +9,7 @@ namespace Minibank.Data.Transfers.Helpers
 {
     public static class MapperTransferDb
     {
-        public static TransferDbModel MapDb(Transfer model)
+        public static TransferDbModel ToTransferDbModel(Transfer model)
         {
             return new()
             {
@@ -21,7 +21,7 @@ namespace Minibank.Data.Transfers.Helpers
             };
         }
 
-        public static Transfer UnmapDb(TransferDbModel model)
+        public static Transfer ToTransfer(TransferDbModel model)
         {
             return new()
             {

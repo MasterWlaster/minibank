@@ -20,7 +20,7 @@ namespace Minibank.Data.Users.Repositories
             int id = NewId();
 
             data.Id = id;
-            id2User[id] = MapperUserDb.MapDb(data);
+            id2User[id] = MapperUserDb.ToUserDbModel(data);
 
             return id;
         }
@@ -35,7 +35,7 @@ namespace Minibank.Data.Users.Repositories
 
         public User Get(int id)
         {
-            return MapperUserDb.UnmapDb(GetModel(id));
+            return MapperUserDb.ToUser(GetModel(id));
         }
 
         public void Update(int id, User data)

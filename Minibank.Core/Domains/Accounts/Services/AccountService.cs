@@ -84,23 +84,9 @@ namespace Minibank.Core.Domains.Accounts.Services
             var fromAccount = _accountRepository.Get(toAccountId);
             var toAccount = _accountRepository.Get(toAccountId);
             
-            commission = _currencyConverter.Convert(commission, fromAccount.CurrencyCode, toAccount.CurrencyCode);
-            amount = _currencyConverter.Convert(amount, fromAccount.CurrencyCode, toAccount.CurrencyCode);
+            amount = _currencyConverter.Convert(amount - commission, fromAccount.CurrencyCode, toAccount.CurrencyCode);
 
-            _accountRepository.ChangeMoney(toAccountId, amount - commission);
-
-            /*
-            _accountRepository.Update(
-                fromAccount.Id,
-                new() { Money = fromAccount.Money - amount });
-
-            commission = _currencyConverter.Convert(commission, fromAccount.CurrencyCode, toAccount.CurrencyCode);
-            amount = _currencyConverter.Convert(amount, fromAccount.CurrencyCode, toAccount.CurrencyCode);
-
-            _accountRepository.Update(
-                toAccount.Id,
-                new() { Money = toAccount.Money + amount - commission });
-            */
+            _accountRepository.ChangeMoney(toAccountId, amount);
 
             _transferService.Log(
                 new() {
