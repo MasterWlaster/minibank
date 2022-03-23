@@ -26,9 +26,9 @@ namespace Minibank.Web.Controllers
         /// </summary>
         /// <param name="model"></param>
         [HttpPost]
-        public void Create(UserDto model)
+        public int Create(UserDto model)
         {
-            _userService.Create(MapperUser.Map(model));
+            return _userService.Create(MapperUser.Map(model));
         }
 
         /// <summary>

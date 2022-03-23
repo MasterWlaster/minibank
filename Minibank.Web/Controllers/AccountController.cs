@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Minibank.Web.Dto.Mapping;
 using Minibank.Core.Domains.Accounts.Services;
 using Microsoft.AspNetCore.Mvc;
+using Minibank.Web.Dto;
 
 namespace Minibank.Web.Controllers
 {
@@ -25,9 +26,9 @@ namespace Minibank.Web.Controllers
         /// <param name="userId"></param>
         /// <param name="currencyCode"></param>
         [HttpPost]
-        public void Create(int userId, string currencyCode)
+        public int Create(int userId, string currencyCode)
         {
-            _accountService.Create(userId, currencyCode);
+            return _accountService.Create(userId, currencyCode);
         }
 
         /// <summary>
@@ -38,6 +39,16 @@ namespace Minibank.Web.Controllers
         public void Close(int id)
         {
             _accountService.Close(id);
+        }
+
+        /// <summary>
+        /// Change Money
+        /// </summary>
+        /// <param name="id"></param>
+        [HttpPost("change_money")]
+        public void ChangeMoney(int id, decimal delta)
+        {
+            _accountService.ChangeMoney(id, delta);
         }
 
         /// <summary>
@@ -59,7 +70,7 @@ namespace Minibank.Web.Controllers
         /// <param name="money"></param>
         /// <param name="fromAccountId"></param>
         /// <param name="toAccountId"></param>
-        [HttpPut]
+        [HttpPost("do_transfer")]
         public void DoTransfer(decimal money, int fromAccountId, int toAccountId)
         {
             _accountService.DoTransfer(money, fromAccountId, toAccountId);

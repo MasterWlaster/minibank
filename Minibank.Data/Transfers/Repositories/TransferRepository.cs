@@ -11,8 +11,8 @@ namespace Minibank.Data.Transfers.Repositories
 {
     public class TransferRepository : ITransferRepository
     {
-        Dictionary<int, TransferDbModel> id2transfer = new();
-        int lastId = 0;
+        static Dictionary<int, TransferDbModel> id2transfer = new();
+        static int lastId = 0;
         
         public int Create(Transfer data)
         {

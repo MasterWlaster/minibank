@@ -11,21 +11,31 @@ using Minibank.Data.Accounts.Repositories;
 using Minibank.Data.Transfers.Repositories;
 using Minibank.Data.Users.Repositories;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Minibank.Data.Exchanges;
+using System.Configuration;
 using System.Net.Http;
 
 namespace Minibank.Data
 {
     public static class Bootstrap
     {
-        public static IServiceCollection AddData(this IServiceCollection services)
+        public static IServiceCollection AddData(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ITransferRepository, TransferRepository>();
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IExchangeRateProvider, ExchangeRateProvider>();
-            services.AddHttpClient<HttpClient>();
-            
+            services.AddHttpClient<ExchangeRateProvider>();
+
+            //not working:
+            //
+            //services.AddHttpClient<IExchangeRateProvider, ExchangeRateProvider>();
+            //    client => { client.BaseAddress = new Uri(configuration["ExchangesCbRussia"]); });
+            //
+            //services.AddHttpClient<ExchangeRateProvider>();
+            //    client => { client.BaseAddress = new Uri(configuration["ExchangesCbRussia"]); });
+
             return services;
         }
     }

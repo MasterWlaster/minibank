@@ -9,16 +9,20 @@ using System.Text.Json;
 using Minibank.Core.Exceptions;
 using Minibank.Data.Exchanges.Models;
 using Minibank.Core.Exchanges;
+using Minibank.Core.Helpers;
+using Microsoft.Extensions.Configuration;
 
 namespace Minibank.Data.Exchanges
 {
     public class ExchangeRateProvider : IExchangeRateProvider
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _configuration;
 
-        public ExchangeRateProvider(IHttpClientFactory httpClientFactory)
+        public ExchangeRateProvider(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
         }
 
         public decimal RateOf(string currencyCode)
@@ -28,14 +32,14 @@ namespace Minibank.Data.Exchanges
 
         decimal GetRate(string currencyCode)
         {
-            if (currencyCode == "RUB")
+            if (currencyCode == Currency.DefaultCurrency)
             {
                 return 1;
             }
             
             var httpClient = _httpClientFactory.CreateClient();
             var response = httpClient
-                .GetFromJsonAsync<ExchangeRateResponse>("https://www.cbr-xml-daily.ru/daily_json.js")
+                .GetFromJsonAsync<ExchangeRateResponse>(_configuration["ExchangesCbRussia"]) // "")
                 .GetAwaiter()
                 .GetResult();
 

@@ -12,8 +12,8 @@ namespace Minibank.Data.Users.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        Dictionary<int, UserDbModel> id2User = new();
-        int lastId = 0;
+        static Dictionary<int, UserDbModel> id2User = new();
+        static int lastId = 0;
         
         public int Create(User data)
         {
@@ -41,10 +41,14 @@ namespace Minibank.Data.Users.Repositories
         public void Update(int id, User data)
         {
             var user = GetModel(id);
-            var userData = MapperUserDb.MapDb(data);
 
-            user.Login = userData.Login;
-            user.Email = userData.Email;
+            user.Login = data.Login ?? user.Login;
+            user.Email = data.Email ?? user.Email;
+
+            //var userData = MapperUserDb.MapDb(data);
+            //
+            //user.Login = userData.Login;
+            //user.Email = userData.Email;
         }
 
         int NewId()

@@ -57,6 +57,11 @@ namespace Minibank.Core.Domains.Accounts.Services
             _accountRepository.Delete(id);
         }
 
+        public void ChangeMoney(int id, decimal amount)
+        {
+            _accountRepository.ChangeMoney(id, amount);
+        }
+
         public int Create(int userId, string currencyCode)
         {
             _userService.Get(userId);
@@ -73,15 +78,18 @@ namespace Minibank.Core.Domains.Accounts.Services
 
         public void DoTransfer(decimal amount, int fromAccountId, int toAccountId)
         {
+            _accountRepository.ChangeMoney(fromAccountId, -amount);
+
             var commission = CalculateCommission(amount, fromAccountId, toAccountId);
-            var fromAccount = _accountRepository.Get(fromAccountId);
+            var fromAccount = _accountRepository.Get(toAccountId);
             var toAccount = _accountRepository.Get(toAccountId);
+            
+            commission = _currencyConverter.Convert(commission, fromAccount.CurrencyCode, toAccount.CurrencyCode);
+            amount = _currencyConverter.Convert(amount, fromAccount.CurrencyCode, toAccount.CurrencyCode);
 
-            if (fromAccount.Money - amount < 0)
-            {
-                throw new ValidationException("not enough money");
-            }
+            _accountRepository.ChangeMoney(toAccountId, amount - commission);
 
+            /*
             _accountRepository.Update(
                 fromAccount.Id,
                 new() { Money = fromAccount.Money - amount });
@@ -92,6 +100,7 @@ namespace Minibank.Core.Domains.Accounts.Services
             _accountRepository.Update(
                 toAccount.Id,
                 new() { Money = toAccount.Money + amount - commission });
+            */
 
             _transferService.Log(
                 new() {

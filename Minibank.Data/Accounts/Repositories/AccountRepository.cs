@@ -14,9 +14,9 @@ namespace Minibank.Data.Accounts.Repositories
 {
     public class AccountRepository : IAccountRepository
     {
-        Dictionary<int, AccountDbModel> id2Account = new();
-        Dictionary<int, List<int>> userId2AccountIds = new();
-        int lastId = 0;
+        static Dictionary<int, AccountDbModel> id2Account = new();
+        static Dictionary<int, List<int>> userId2AccountIds = new();
+        static int lastId = 0;
 
         public int Create(int userId, string currencyCode)
         {
@@ -61,13 +61,28 @@ namespace Minibank.Data.Accounts.Repositories
             return MapperAccountDb.UnmapDb(GetModel(id));
         }
 
-        public void Update(int id, Account data)
+        public void ChangeMoney(int id, decimal delta)
         {
-            var account = GetModel(id);
+            var model = GetModel(id);
 
-            account.IsActive = data.IsActive;
-            account.Money = data.Money;
-            account.CloseDate = data.CloseDate;
+            if (!model.IsActive)
+            {
+                throw new ValidationException("account not active");
+            }
+
+            if (model.Money + delta < 0)
+            {
+                throw new ValidationException("balance cannot be lower than zero");
+            }
+
+            model.Money += delta;
+        }
+
+        public bool ExistsWithUser(int userId)
+        {
+            var list = userId2AccountIds[userId];
+
+            return list != null && list.Count > 0;
         }
 
         int NewId()

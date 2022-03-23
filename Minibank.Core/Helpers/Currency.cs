@@ -9,6 +9,8 @@ namespace Minibank.Core.Helpers
     public static class Currency
     {
         private readonly static List<string> currencies = new(){ "RUB", "USD", "EUR"};
+
+        public static string DefaultCurrency => "RUB";
         
         public static string Normalize(string currencyCode)
         {
