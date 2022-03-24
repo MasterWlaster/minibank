@@ -39,7 +39,7 @@ namespace Minibank.Data.Exchanges
             
             var httpClient = _httpClientFactory.CreateClient();
             var response = httpClient
-                .GetFromJsonAsync<ExchangeRateResponse>(_configuration["ExchangesCbRussia"]) // "")
+                .GetFromJsonAsync<ExchangeRateResponse>("daily_json.js")//_configuration["ExchangesCbRussia"] + "/daily_json.js") // "")
                 .GetAwaiter()
                 .GetResult();
 

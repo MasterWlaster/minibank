@@ -28,7 +28,7 @@ namespace Minibank.Web.Controllers
         [HttpPost]
         public int Create(UserDto model)
         {
-            return _userService.Create(MapperUser.Map(model));
+            return _userService.Create(MapperUser.ToUser(model));
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Minibank.Web.Controllers
         [HttpPut]
         public void Update(UserDto model)
         {
-            _userService.Update(model.Id, MapperUser.Map(model));
+            _userService.Update(model.Id, MapperUser.ToUser(model));
         }
 
         /// <summary>

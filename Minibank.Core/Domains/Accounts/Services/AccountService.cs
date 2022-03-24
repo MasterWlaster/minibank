@@ -49,7 +49,7 @@ namespace Minibank.Core.Domains.Accounts.Services
                 return Decimal.Round(amount * COMMISSION_MULTIPLIER, DECIMAL_PLACES);
             }
 
-            throw new Exception("accounts not active");
+            throw new ValidationException("accounts not active");
         }
 
         public void Close(int id)
@@ -57,9 +57,21 @@ namespace Minibank.Core.Domains.Accounts.Services
             _accountRepository.Delete(id);
         }
 
-        public void ChangeMoney(int id, decimal amount)
+        public void ChangeMoney(int id, decimal delta)
         {
-            _accountRepository.ChangeMoney(id, amount);
+            var account = _accountRepository.Get(id);
+            
+            if (!account.IsActive)
+            {
+                throw new ValidationException("account not active");
+            }
+
+            if (account.Money + delta < 0)
+            {
+                throw new ValidationException("balance cannot be lower than zero");
+            }
+
+            _accountRepository.ChangeMoney(id, delta);
         }
 
         public int Create(int userId, string currencyCode)
@@ -78,7 +90,7 @@ namespace Minibank.Core.Domains.Accounts.Services
 
         public void DoTransfer(decimal amount, int fromAccountId, int toAccountId)
         {
-            _accountRepository.ChangeMoney(fromAccountId, -amount);
+            ChangeMoney(fromAccountId, -amount);
 
             var commission = CalculateCommission(amount, fromAccountId, toAccountId);
             var fromAccount = _accountRepository.Get(toAccountId);
@@ -86,7 +98,7 @@ namespace Minibank.Core.Domains.Accounts.Services
             
             amount = _currencyConverter.Convert(amount - commission, fromAccount.CurrencyCode, toAccount.CurrencyCode);
 
-            _accountRepository.ChangeMoney(toAccountId, amount);
+            ChangeMoney(toAccountId, amount);
 
             _transferService.Log(
                 new() {

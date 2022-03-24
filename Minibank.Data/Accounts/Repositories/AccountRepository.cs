@@ -65,16 +65,6 @@ namespace Minibank.Data.Accounts.Repositories
         {
             var model = GetModel(id);
 
-            if (!model.IsActive)
-            {
-                throw new ValidationException("account not active");
-            }
-
-            if (model.Money + delta < 0)
-            {
-                throw new ValidationException("balance cannot be lower than zero");
-            }
-
             model.Money += delta;
         }
 
