@@ -27,10 +27,7 @@ namespace Minibank.Data.Users.Repositories
 
         public void Delete(int id)
         {
-            if (!id2User.Remove(id))
-            {
-                throw new ValidationException("user not found");
-            }
+            id2User.Remove(id);
         }
 
         public User Get(int id)
@@ -44,11 +41,6 @@ namespace Minibank.Data.Users.Repositories
 
             user.Login = data.Login ?? user.Login;
             user.Email = data.Email ?? user.Email;
-
-            //var userData = MapperUserDb.MapDb(data);
-            //
-            //user.Login = userData.Login;
-            //user.Email = userData.Email;
         }
 
         int NewId()

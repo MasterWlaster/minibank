@@ -46,14 +46,8 @@ namespace Minibank.Data.Accounts.Repositories
         {
             var account = GetModel(id);
 
-            if (account.Money != 0)
-            {
-                throw new ValidationException("not zero balance");
-            }
-
             id2Account.Remove(id);
-            userId2AccountIds[account.UserId].Remove(id);
-            
+            userId2AccountIds[account.UserId].Remove(id);            
         }
 
         public Account Get(int id)
@@ -61,11 +55,14 @@ namespace Minibank.Data.Accounts.Repositories
             return MapperAccountDb.ToAccount(GetModel(id));
         }
 
-        public void ChangeMoney(int id, decimal delta)
+        public void Update(int id, Account data, bool isMoneyUpdating = false)
         {
             var model = GetModel(id);
 
-            model.Money += delta;
+            if (isMoneyUpdating)
+            {
+                model.Money = data.Money;
+            }
         }
 
         public bool ExistsWithUser(int userId)

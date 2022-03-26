@@ -54,6 +54,13 @@ namespace Minibank.Core.Domains.Accounts.Services
 
         public void Close(int id)
         {
+            var account = _accountRepository.Get(id);
+
+            if (account.Money != 0)
+            {
+                throw new ValidationException("not zero balance");
+            }
+
             _accountRepository.Delete(id);
         }
 
@@ -71,7 +78,10 @@ namespace Minibank.Core.Domains.Accounts.Services
                 throw new ValidationException("balance cannot be lower than zero");
             }
 
-            _accountRepository.ChangeMoney(id, delta);
+            _accountRepository.Update(
+                id, 
+                new Account{ Money = account.Money + delta }, 
+                isMoneyUpdating: true);
         }
 
         public int Create(int userId, string currencyCode)

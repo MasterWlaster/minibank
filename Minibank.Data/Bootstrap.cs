@@ -25,17 +25,9 @@ namespace Minibank.Data
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ITransferRepository, TransferRepository>();
             services.AddScoped<IAccountRepository, AccountRepository>();
-            //services.AddScoped<IExchangeRateProvider, ExchangeRateProvider>();
-            //services.AddHttpClient<ExchangeRateProvider>();
-
-            //not working:
-            //
             services.AddHttpClient<IExchangeRateProvider, ExchangeRateProvider>(
                 client => { client.BaseAddress = new Uri(configuration["ExchangesCbRussia"]); });
-            //
-            //services.AddHttpClient<ExchangeRateProvider>();
-            //    client => { client.BaseAddress = new Uri(configuration["ExchangesCbRussia"]); });
-
+            
             return services;
         }
     }

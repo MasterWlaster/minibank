@@ -11,7 +11,7 @@ namespace Minibank.Core.Domains.Accounts.Repositories
         int Create(int userId, string currencyCode);
         Account Get(int id);
         void Delete(int id);
-        void ChangeMoney(int id, decimal delta);
+        void Update(int id, Account data, bool isMoneyUpdating = false);
         bool ExistsWithUser(int userId);
     }
 }

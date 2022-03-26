@@ -16,13 +16,15 @@ namespace Minibank.Data.Exchanges
 {
     public class ExchangeRateProvider : IExchangeRateProvider
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        //private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
+        private readonly HttpClient _httpClient;
 
-        public ExchangeRateProvider(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public ExchangeRateProvider(IConfiguration configuration, HttpClient httpClient)
         {
-            _httpClientFactory = httpClientFactory;
+            //_httpClientFactory = httpClientFactory;
             _configuration = configuration;
+            _httpClient = httpClient;
         }
 
         public decimal RateOf(string currencyCode)
@@ -36,10 +38,9 @@ namespace Minibank.Data.Exchanges
             {
                 return 1;
             }
-            
-            var httpClient = _httpClientFactory.CreateClient();
-            var response = httpClient
-                .GetFromJsonAsync<ExchangeRateResponse>("daily_json.js")//_configuration["ExchangesCbRussia"] + "/daily_json.js") // "")
+
+            var response = _httpClient
+                .GetFromJsonAsync<ExchangeRateResponse>("daily_json.js")
                 .GetAwaiter()
                 .GetResult();
 

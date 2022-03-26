@@ -32,6 +32,8 @@ namespace Minibank.Core.Domains.Users.Services
                 throw new ValidationException("user has active accounts");
             }
 
+            _userRepository.Get(id);
+
             _userRepository.Delete(id);
         }
 
