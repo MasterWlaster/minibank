@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Minibank.Core.Exceptions
 {
-    public class VisibleInResponseException : Exception
+    public class ValidationException : Exception
     {
-        public VisibleInResponseException(string message) : base(message)
+        public ValidationException(string message) : base(message)
         {
             
         }

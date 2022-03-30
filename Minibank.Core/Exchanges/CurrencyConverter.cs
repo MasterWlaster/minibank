@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Minibank.Core.Exceptions;
 
-namespace Minibank.Core
+namespace Minibank.Core.Exchanges
 {
     public class CurrencyConverter : ICurrencyConverter
     {
@@ -16,11 +16,11 @@ namespace Minibank.Core
             _exchangeRateProvider = excangeRateProvider;
         }
 
-        public decimal Convert(int value, string fromCurrency, string intoCurrency)
+        public decimal Convert(decimal value, string fromCurrency, string intoCurrency)
         {
             if (value < 0)
             {
-                throw new VisibleInResponseException("Cannot convert negative value");
+                throw new ValidationException("Cannot convert negative value");
             }
 
             return 

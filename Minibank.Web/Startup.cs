@@ -35,8 +35,8 @@ namespace Minibank.Web
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Minibank.Web", Version = "v1" });
             });
 
-            services.AddScoped<ICurrencyConverter, CurrencyConverter>();
-            services.AddScoped<IExchangeRateProvider, ExchangeRateProvider>();
+            services.AddCore();
+            services.AddData(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,7 +50,7 @@ namespace Minibank.Web
             }
 
             app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMiddleware<VisibleInResponseExceptionMiddleware>();
+            app.UseMiddleware<ValidationExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 

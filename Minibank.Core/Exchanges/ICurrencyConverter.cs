@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Minibank.Core
+namespace Minibank.Core.Exchanges
 {
     public interface ICurrencyConverter
     {
         /// <param name="fromCurrency">Сurrency code to convert from</param>
         /// <param name="intoCurrency">Currency code to convert into</param>
-        decimal Convert(int value, string fromCurrency, string intoCurrency);
+        decimal Convert(decimal value, string fromCurrency, string intoCurrency);
     }
 }

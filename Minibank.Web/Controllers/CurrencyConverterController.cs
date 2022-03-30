@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Minibank.Core;
+using Minibank.Core.Exchanges;
 
 namespace Minibank.Web.Controllers
 {
@@ -18,10 +18,10 @@ namespace Minibank.Web.Controllers
             _currencyConverter = currencyConverter;
         }
 
-        [HttpGet("{fromCurrency}")]
-        public decimal ConvertRubles([FromRoute] string fromCurrency, int value, string intoCurrency)
+        [HttpGet]
+        public decimal Convert(int amount, string fromCurrency, string toCurrency)
         {
-            return _currencyConverter.Convert(value, fromCurrency, intoCurrency);
+            return _currencyConverter.Convert(amount, fromCurrency, toCurrency);
         }
     }
 }

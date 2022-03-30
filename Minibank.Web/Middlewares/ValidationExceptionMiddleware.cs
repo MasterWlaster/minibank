@@ -7,11 +7,11 @@ using Minibank.Core.Exceptions;
 
 namespace Minibank.Web.Middlewares
 {
-    public class VisibleInResponseExceptionMiddleware
+    public class ValidationExceptionMiddleware
     {
         public readonly RequestDelegate next;
 
-        public VisibleInResponseExceptionMiddleware(RequestDelegate next)
+        public ValidationExceptionMiddleware(RequestDelegate next)
         {
             this.next = next;
         }
@@ -22,7 +22,7 @@ namespace Minibank.Web.Middlewares
             {
                 await next(httpContext);
             }
-            catch (VisibleInResponseException exception)
+            catch (ValidationException exception)
             {
                 httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await httpContext.Response.WriteAsJsonAsync(new { Message = exception.Message });
