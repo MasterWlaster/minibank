@@ -12,6 +12,13 @@ namespace Minibank.Data.Users.Repositories
 {
     public class UserRepository : IUserRepository
     {
+        private readonly Context _context;
+
+        public UserRepository(Context context)
+        {
+            _context = context;
+        }
+        
         static Dictionary<int, UserDbModel> id2User = new();
         static int lastId = 0;
         

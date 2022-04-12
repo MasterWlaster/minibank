@@ -9,7 +9,12 @@ namespace Minibank.Data
 {
     public class EfUnitOfWork : IUnitOfWork
     {
-        
+        private readonly Context _context;
+
+        public EfUnitOfWork(Context context)
+        {
+            _context = context;
+        }
 
         public int SaveChanges()
         {

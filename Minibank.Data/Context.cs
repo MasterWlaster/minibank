@@ -6,12 +6,16 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Minibank.Data.Users;
 using Microsoft.EntityFrameworkCore.Design;
+using Minibank.Data.Accounts;
+using Minibank.Data.Transfers;
 
 namespace Minibank.Data
 {
     public class Context : DbContext
     {
         public DbSet<UserDbModel> Users { get; set; }
+        public DbSet<AccountDbModel> Accounts { get; set; }
+        public DbSet<TransferDbModel> Transfers { get; set; }
 
         public Context(DbContextOptions options) : base(options)
         {
@@ -33,7 +37,7 @@ namespace Minibank.Data
         }
     }
 
-    /*public class Factory : IDesignTimeDbContextFactory<Context>
+    public class Factory : IDesignTimeDbContextFactory<Context>
     {
         public Context CreateDbContext(string[] args)
         {
@@ -43,7 +47,7 @@ namespace Minibank.Data
 
             return new Context(options);
         }
-    }*/
+    }
 }
 
 

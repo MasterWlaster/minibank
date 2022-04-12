@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using Minibank.Data.Accounts;
+using Minibank.Data.Transfers;
 
 namespace Minibank.Data.Users
 {
@@ -16,14 +18,25 @@ namespace Minibank.Data.Users
         public string Login { get; set; }
         public string Email { get; set; }
 
+        public virtual List<AccountDbModel> Accounts { get; set; }
+
         internal class Map : IEntityTypeConfiguration<UserDbModel>
         {
             public void Configure(EntityTypeBuilder<UserDbModel> builder)
             {
+                //id
                 builder.Property(it => it.Id)
                     .HasColumnName("id");
 
                 builder.HasKey(it => it.Id).HasName("pk_id");
+
+                //login
+                builder.Property(it => it.Login)
+                    .HasColumnName("login");
+
+                //email
+                builder.Property(it => it.Email)
+                    .HasColumnName("email");
 
                 //builder.Ignore
 
