@@ -13,6 +13,7 @@ namespace Minibank.Core.Domains.Users.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IAccountRepository _accountRepository;
+        //private readonly IUnitOfWork _unitOfWork;
 
         public UserService(IUserRepository userRepository, IAccountRepository accountService)
         {
@@ -22,7 +23,7 @@ namespace Minibank.Core.Domains.Users.Services
 
         public int Create(User data)
         {
-            return _userRepository.Create(data);
+            return _userRepository.Create(data); //_unitOfWork.SaveChanges();
         }
 
         public void Delete(int id)
