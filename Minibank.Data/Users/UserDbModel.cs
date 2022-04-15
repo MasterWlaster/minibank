@@ -28,7 +28,7 @@ namespace Minibank.Data.Users
                 builder.Property(it => it.Id)
                     .HasColumnName("id");
 
-                builder.HasKey(it => it.Id).HasName("pk_id");
+                builder.HasKey(it => it.Id);//.HasName("pk_id");
 
                 //login
                 builder.Property(it => it.Login)

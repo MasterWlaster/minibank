@@ -30,7 +30,7 @@ namespace Minibank.Data.Transfers
                 builder.Property(it => it.Id)
                     .HasColumnName("id");
 
-                builder.HasKey(it => it.Id).HasName("pk_id");
+                builder.HasKey(it => it.Id);//.HasName("pk_id");
 
                 //money
                 builder.Property(it => it.Money)
@@ -45,7 +45,7 @@ namespace Minibank.Data.Transfers
                     .HasColumnName("from_account_id");
 
                 builder.HasOne(it => it.FromAccount)
-                    .WithMany(it => it.TransfersOutgoing)
+                    .WithMany()
                     .HasForeignKey(it => it.FromAccountId);
 
                 //to_account_id
@@ -53,7 +53,7 @@ namespace Minibank.Data.Transfers
                     .HasColumnName("to_account_id");
 
                 builder.HasOne(it => it.ToAccount)
-                    .WithMany(it => it.TransfersIngoing)
+                    .WithMany()
                     .HasForeignKey(it => it.ToAccountId);
             }
         }

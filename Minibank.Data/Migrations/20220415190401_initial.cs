@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Minibank.Data.Migrations
 {
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -19,7 +19,7 @@ namespace Minibank.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_id", x => x.id);
+                    table.PrimaryKey("PK_user", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -37,7 +37,7 @@ namespace Minibank.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_id", x => x.id);
+                    table.PrimaryKey("PK_account", x => x.id);
                     table.ForeignKey(
                         name: "FK_account_user_user_id",
                         column: x => x.user_id,
@@ -59,7 +59,7 @@ namespace Minibank.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_id", x => x.id);
+                    table.PrimaryKey("PK_transfer", x => x.id);
                     table.ForeignKey(
                         name: "FK_transfer_account_from_account_id",
                         column: x => x.from_account_id,

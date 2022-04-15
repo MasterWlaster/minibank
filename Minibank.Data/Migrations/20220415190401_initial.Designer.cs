@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Minibank.Data.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20220412183710_Initial")]
-    partial class Initial
+    [Migration("20220415190401_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -53,8 +53,7 @@ namespace Minibank.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("user_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_id");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
@@ -85,8 +84,7 @@ namespace Minibank.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("to_account_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_id");
+                    b.HasKey("Id");
 
                     b.HasIndex("FromAccountId");
 
@@ -111,8 +109,7 @@ namespace Minibank.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("login");
 
-                    b.HasKey("Id")
-                        .HasName("pk_id");
+                    b.HasKey("Id");
 
                     b.ToTable("user");
                 });
@@ -131,13 +128,13 @@ namespace Minibank.Data.Migrations
             modelBuilder.Entity("Minibank.Data.Transfers.TransferDbModel", b =>
                 {
                     b.HasOne("Minibank.Data.Accounts.AccountDbModel", "FromAccount")
-                        .WithMany("TransfersOutgoing")
+                        .WithMany()
                         .HasForeignKey("FromAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Minibank.Data.Accounts.AccountDbModel", "ToAccount")
-                        .WithMany("TransfersIngoing")
+                        .WithMany()
                         .HasForeignKey("ToAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -145,13 +142,6 @@ namespace Minibank.Data.Migrations
                     b.Navigation("FromAccount");
 
                     b.Navigation("ToAccount");
-                });
-
-            modelBuilder.Entity("Minibank.Data.Accounts.AccountDbModel", b =>
-                {
-                    b.Navigation("TransfersIngoing");
-
-                    b.Navigation("TransfersOutgoing");
                 });
 
             modelBuilder.Entity("Minibank.Data.Users.UserDbModel", b =>

@@ -23,8 +23,9 @@ namespace Minibank.Data.Accounts
         public DateTime OpenDate { get; set; }
         public DateTime CloseDate { get; set; }
 
-        public virtual List<TransferDbModel> TransfersOutgoing { get; set; }
-        public virtual List<TransferDbModel> TransfersIngoing { get; set; }
+        //public virtual List<TransferDbModel> TransfersOutgoing { get; set; }
+        //public virtual List<TransferDbModel> TransfersIngoing { get; set; }
+        //public virtual List<TransferDbModel> Transfers { get; set; }
 
         internal class Map : IEntityTypeConfiguration<AccountDbModel>
         {
@@ -34,7 +35,7 @@ namespace Minibank.Data.Accounts
                 builder.Property(it => it.Id)
                     .HasColumnName("id");
 
-                builder.HasKey(it => it.Id).HasName("pk_id");
+                builder.HasKey(it => it.Id);//.HasName("pk_id");
 
                 //user_id
                 builder.Property(it => it.UserId)

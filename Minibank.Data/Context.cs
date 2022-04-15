@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Minibank.Data.Users;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using Minibank.Data.Accounts;
 using Minibank.Data.Transfers;
 
@@ -25,7 +26,6 @@ namespace Minibank.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(Context).Assembly);
-            //modelBuilder.ApplyConfiguration(new UserDbModel.Map());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -37,12 +37,13 @@ namespace Minibank.Data
         }
     }
 
+    //for creating migrations
     public class Factory : IDesignTimeDbContextFactory<Context>
     {
         public Context CreateDbContext(string[] args)
         {
             var options = new DbContextOptionsBuilder()
-                .UseNpgsql("Host=localhost;Port=5432;Database=Minibank;Username=minibank;Password=123456")
+                .UseNpgsql()
                 .Options;
 
             return new Context(options);
