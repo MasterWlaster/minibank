@@ -26,9 +26,9 @@ namespace Minibank.Web.Controllers
         /// </summary>
         /// <param name="model"></param>
         [HttpPost]
-        public int Create(UserDto model)
+        public async Task Create(UserDto model)
         {
-            return _userService.Create(MapperUser.ToUser(model));
+            await _userService.CreateAsync(MapperUser.ToUser(model));
         }
 
         /// <summary>
@@ -36,9 +36,9 @@ namespace Minibank.Web.Controllers
         /// </summary>
         /// <param name="model"></param>
         [HttpPut]
-        public void Update(UserDto model)
+        public async Task Update(UserDto model)
         {
-            _userService.Update(model.Id, MapperUser.ToUser(model));
+            await _userService.UpdateAsync(model.Id, MapperUser.ToUser(model));
         }
 
         /// <summary>
@@ -46,9 +46,9 @@ namespace Minibank.Web.Controllers
         /// </summary>
         /// <param name="id"></param>
         [HttpDelete]
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
-            _userService.Delete(id);
+            await _userService.DeleteAsync(id);
         }
     }
 }

@@ -8,10 +8,10 @@ namespace Minibank.Core.Domains.Accounts.Services
 {
     public interface IAccountService
     {
-        int Create(int userId, string currencyCode);
-        void Close(int id);
-        void ChangeMoney(int id, decimal delta);
-        decimal CalculateCommission(decimal amount, int fromAccountId, int toAccountId);
-        void DoTransfer(decimal amount, int fromAccountId, int toAccountId);
+        Task CreateAsync(int userId, string currencyCode);
+        Task CloseAsync(int id);
+        Task AddMoneyAsync(int id, decimal delta);
+        Task<decimal> CalculateCommissionAsync(decimal amount, int fromAccountId, int toAccountId);
+        Task DoTransferAsync(decimal amount, int fromAccountId, int toAccountId);
     }
 }

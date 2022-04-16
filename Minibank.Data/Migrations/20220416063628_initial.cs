@@ -19,7 +19,7 @@ namespace Minibank.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_user", x => x.id);
+                    table.PrimaryKey("pk_user", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -37,9 +37,9 @@ namespace Minibank.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_account", x => x.id);
+                    table.PrimaryKey("pk_account", x => x.id);
                     table.ForeignKey(
-                        name: "FK_account_user_user_id",
+                        name: "fk_account_user_user_id",
                         column: x => x.user_id,
                         principalTable: "user",
                         principalColumn: "id",
@@ -59,15 +59,15 @@ namespace Minibank.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_transfer", x => x.id);
+                    table.PrimaryKey("pk_transfer", x => x.id);
                     table.ForeignKey(
-                        name: "FK_transfer_account_from_account_id",
+                        name: "fk_transfer_account_from_account_id",
                         column: x => x.from_account_id,
                         principalTable: "account",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_transfer_account_to_account_id",
+                        name: "fk_transfer_account_to_account_id",
                         column: x => x.to_account_id,
                         principalTable: "account",
                         principalColumn: "id",
@@ -75,17 +75,17 @@ namespace Minibank.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_user_id",
+                name: "ix_account_user_id",
                 table: "account",
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_transfer_from_account_id",
+                name: "ix_transfer_from_account_id",
                 table: "transfer",
                 column: "from_account_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_transfer_to_account_id",
+                name: "ix_transfer_to_account_id",
                 table: "transfer",
                 column: "to_account_id");
         }

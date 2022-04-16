@@ -51,9 +51,11 @@ namespace Minibank.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_account");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_account_user_id");
 
                     b.ToTable("account");
                 });
@@ -82,11 +84,14 @@ namespace Minibank.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("to_account_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_transfer");
 
-                    b.HasIndex("FromAccountId");
+                    b.HasIndex("FromAccountId")
+                        .HasDatabaseName("ix_transfer_from_account_id");
 
-                    b.HasIndex("ToAccountId");
+                    b.HasIndex("ToAccountId")
+                        .HasDatabaseName("ix_transfer_to_account_id");
 
                     b.ToTable("transfer");
                 });
@@ -107,7 +112,8 @@ namespace Minibank.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("login");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_user");
 
                     b.ToTable("user");
                 });
@@ -117,6 +123,7 @@ namespace Minibank.Data.Migrations
                     b.HasOne("Minibank.Data.Users.UserDbModel", "User")
                         .WithMany("Accounts")
                         .HasForeignKey("UserId")
+                        .HasConstraintName("fk_account_user_user_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -128,12 +135,14 @@ namespace Minibank.Data.Migrations
                     b.HasOne("Minibank.Data.Accounts.AccountDbModel", "FromAccount")
                         .WithMany()
                         .HasForeignKey("FromAccountId")
+                        .HasConstraintName("fk_transfer_account_from_account_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Minibank.Data.Accounts.AccountDbModel", "ToAccount")
                         .WithMany()
                         .HasForeignKey("ToAccountId")
+                        .HasConstraintName("fk_transfer_account_to_account_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

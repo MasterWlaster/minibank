@@ -19,7 +19,7 @@ namespace Minibank.Data.Accounts.Repositories
             _context = context;
         }
         
-        public int Create(int userId, string currencyCode)
+        public void Create(int userId, string currencyCode)
         {
             var entity = new AccountDbModel()
             {
@@ -31,22 +31,21 @@ namespace Minibank.Data.Accounts.Repositories
             };
 
             _context.Accounts.Add(entity);
-
-            return 0; //todo return id
         }
 
-        public Account Get(int id)
+        public async Task<Account> GetAsync(int id)
         {
-            var entity = _context.Accounts
+            var entity = await _context.Accounts
                 .AsNoTracking()
-                .FirstOrDefault(it => it.Id == id);
+                .FirstOrDefaultAsync(it => it.Id == id);
 
             return entity == null ? null : MapperAccountDb.ToAccount(entity);
         }
 
-        public void Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            var entity = _context.Accounts.FirstOrDefault(it => it.Id == id);
+            var entity = await _context.Accounts
+                .FirstOrDefaultAsync(it => it.Id == id);
 
             if (entity == null)
             {
@@ -56,27 +55,36 @@ namespace Minibank.Data.Accounts.Repositories
             _context.Accounts.Remove(entity);
         }
 
-        public void Update(int id, Account data, bool isMoneyUpdating = false)
+        public async Task AddMoneyAsync(int id, decimal delta)
         {
-            var entity = _context.Accounts.FirstOrDefault(it => it.Id == id);
+            var entity = await _context.Accounts
+                .FirstOrDefaultAsync(it => it.Id == id);
 
             if (entity == null)
             {
                 return;
             }
 
-            if (isMoneyUpdating)
-            {
-                entity.Money = data.Money;
-            }
-
-            //todo updating
-            //_context.Accounts.Update(entity);
+            _context.Accounts.Update(entity);
         }
 
-        public bool ExistsWithUser(int userId)
+        public async Task CloseAsync(int id)
         {
-            var entity = _context.Accounts.FirstOrDefault(it => it.UserId == userId);
+            var entity = await _context.Accounts
+                .FirstOrDefaultAsync(it => it.Id == id);
+
+            if (entity == null)
+            {
+                return;
+            }
+
+            _context.Accounts.Update(entity);
+        }
+
+        public async Task<bool> ExistsWithUserAsync(int userId)
+        {
+            var entity = await _context.Accounts
+                .FirstOrDefaultAsync(it => it.UserId == userId);
 
             return entity != null;
         }

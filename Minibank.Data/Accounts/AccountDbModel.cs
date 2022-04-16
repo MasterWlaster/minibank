@@ -23,47 +23,17 @@ namespace Minibank.Data.Accounts
         public DateTime OpenDate { get; set; }
         public DateTime CloseDate { get; set; }
 
-        //public virtual List<TransferDbModel> TransfersOutgoing { get; set; }
-        //public virtual List<TransferDbModel> TransfersIngoing { get; set; }
-        //public virtual List<TransferDbModel> Transfers { get; set; }
-
         internal class Map : IEntityTypeConfiguration<AccountDbModel>
         {
             public void Configure(EntityTypeBuilder<AccountDbModel> builder)
             {
                 //id
-                builder.Property(it => it.Id)
-                    .HasColumnName("id");
-
-                builder.HasKey(it => it.Id);//.HasName("pk_id");
+                builder.HasKey(it => it.Id);
 
                 //user_id
-                builder.Property(it => it.UserId)
-                    .HasColumnName("user_id");
-
                 builder.HasOne(it => it.User)
                     .WithMany(it => it.Accounts)
                     .HasForeignKey(it => it.UserId);
-
-                //money
-                builder.Property(it => it.Money)
-                    .HasColumnName("money");
-
-                //currency_code
-                builder.Property(it => it.CurrencyCode)
-                    .HasColumnName("currency_code");
-
-                //is_active
-                builder.Property(it => it.IsActive)
-                    .HasColumnName("is_active");
-
-                //open_date
-                builder.Property(it => it.OpenDate)
-                    .HasColumnName("open_date");
-
-                //close_date
-                builder.Property(it => it.CloseDate)
-                    .HasColumnName("close_date");
             }
         }
     }

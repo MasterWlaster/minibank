@@ -10,15 +10,19 @@ namespace Minibank.Core.Domains.Transfers.Services
     public class TransferService : ITransferService
     {
         private readonly ITransferRepository _transferRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TransferService(ITransferRepository transferRepository)
+        public TransferService(ITransferRepository transferRepository, IUnitOfWork unitOfWork)
         {
             _transferRepository = transferRepository;
+            _unitOfWork = unitOfWork;
         }
 
-        public void Log(Transfer data)
+        public async Task LogAsync(Transfer data)
         {
             _transferRepository.Create(data);
+            
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

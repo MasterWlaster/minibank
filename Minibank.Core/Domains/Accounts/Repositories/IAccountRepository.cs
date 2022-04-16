@@ -8,10 +8,10 @@ namespace Minibank.Core.Domains.Accounts.Repositories
 {
     public interface IAccountRepository
     {
-        int Create(int userId, string currencyCode);
-        Account Get(int id);
-        void Delete(int id);
-        void Update(int id, Account data, bool isMoneyUpdating = false);
-        bool ExistsWithUser(int userId);
+        void Create(int userId, string currencyCode);
+        Task<Account> GetAsync(int id);
+        Task AddMoneyAsync(int id, decimal delta);
+        Task CloseAsync(int id);
+        Task<bool> ExistsWithUserAsync(int userId);
     }
 }

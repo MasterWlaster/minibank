@@ -26,9 +26,9 @@ namespace Minibank.Web.Controllers
         /// <param name="userId"></param>
         /// <param name="currencyCode"></param>
         [HttpPost]
-        public int Create(int userId, string currencyCode)
+        public async Task Create(int userId, string currencyCode)
         {
-            return _accountService.Create(userId, currencyCode);
+            await _accountService.CreateAsync(userId, currencyCode);
         }
 
         /// <summary>
@@ -36,9 +36,9 @@ namespace Minibank.Web.Controllers
         /// </summary>
         /// <param name="id"></param>
         [HttpDelete]
-        public void Close(int id)
+        public async Task Close(int id)
         {
-            _accountService.Close(id);
+            await _accountService.CloseAsync(id);
         }
 
         /// <summary>
@@ -46,9 +46,9 @@ namespace Minibank.Web.Controllers
         /// </summary>
         /// <param name="id"></param>
         [HttpPost("change_money")]
-        public void ChangeMoney(int id, decimal delta)
+        public async Task ChangeMoney(int id, decimal delta)
         {
-            _accountService.ChangeMoney(id, delta);
+            await _accountService.AddMoneyAsync(id, delta);
         }
 
         /// <summary>
@@ -59,9 +59,9 @@ namespace Minibank.Web.Controllers
         /// <param name="toAccountId"></param>
         /// <returns></returns>
         [HttpGet]
-        public decimal CalculateCommission(decimal money, int fromAccountId, int toAccountId)
+        public async Task<decimal> CalculateCommission(decimal money, int fromAccountId, int toAccountId)
         {
-            return _accountService.CalculateCommission(money, fromAccountId, toAccountId);
+            return await _accountService.CalculateCommissionAsync(money, fromAccountId, toAccountId);
         }
 
         /// <summary>
@@ -71,9 +71,9 @@ namespace Minibank.Web.Controllers
         /// <param name="fromAccountId"></param>
         /// <param name="toAccountId"></param>
         [HttpPost("do_transfer")]
-        public void DoTransfer(decimal money, int fromAccountId, int toAccountId)
+        public async Task DoTransfer(decimal money, int fromAccountId, int toAccountId)
         {
-            _accountService.DoTransfer(money, fromAccountId, toAccountId);
+            await _accountService.DoTransferAsync(money, fromAccountId, toAccountId);
         }
     }
 }

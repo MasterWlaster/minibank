@@ -8,6 +8,6 @@ namespace Minibank.Core.Domains.Transfers.Services
 {
     public interface ITransferService
     {
-        void Log(Transfer data);
+        Task LogAsync(Transfer data);
     }
 }

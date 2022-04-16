@@ -13,39 +13,44 @@ namespace Minibank.Core.Domains.Users.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IAccountRepository _accountRepository;
-        //private readonly IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UserService(IUserRepository userRepository, IAccountRepository accountService)
+        public UserService(IUserRepository userRepository, IAccountRepository accountService, IUnitOfWork unitOfWork)
         {
             _userRepository = userRepository;
             _accountRepository = accountService;
+            _unitOfWork = unitOfWork;
         }
 
-        public int Create(User data)
+        public async Task CreateAsync(User data)
         {
-            return _userRepository.Create(data); //_unitOfWork.SaveChanges();
+            _userRepository.Create(data);
+
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        public void Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            if (_accountRepository.ExistsWithUser(id))
+            if (await _accountRepository.ExistsWithUserAsync(id))
             {
                 throw new ValidationException("user has active accounts");
             }
 
-            _userRepository.Get(id);
-
-            _userRepository.Delete(id);
+            await _userRepository.DeleteAsync(id);
+            
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        public User Get(int id)
+        public async Task<User> GetAsync(int id)
         {
-            return _userRepository.Get(id);
+            return await _userRepository.GetAsync(id);
         }
 
-        public void Update(int id, User data)
+        public async Task UpdateAsync(int id, User data)
         {
-            _userRepository.Update(id, data);
+            await _userRepository.UpdateAsync(id, data);
+            
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

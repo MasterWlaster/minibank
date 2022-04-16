@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Minibank.Core.Exceptions;
 using Minibank.Core.Helpers;
 using Minibank.Core.Domains.Accounts.Repositories;
+using Minibank.Core.Domains.Transfers;
+using Minibank.Core.Domains.Transfers.Repositories;
 using Minibank.Core.Domains.Transfers.Services;
 using Minibank.Core.Domains.Users.Services;
 using Minibank.Core.Exchanges;
@@ -15,58 +17,60 @@ namespace Minibank.Core.Domains.Accounts.Services
     public class AccountService : IAccountService
     {
         private readonly IAccountRepository _accountRepository;
-        private readonly ITransferService _transferService;
+        private readonly ITransferRepository _transferRepository;
         private readonly IUserService _userService;
         private readonly ICurrencyConverter _currencyConverter;
+        private readonly IUnitOfWork _unitOfWork;
 
-        const decimal COMMISSION_MULTIPLIER = 0.02m;
-        const int DECIMAL_PLACES = 2;
+        const decimal CommissionMultiplier = 0.02m;
+        const int DecimalPlaces = 2;
 
-        public AccountService(IAccountRepository accountRepository, ITransferService transferService, IUserService userService, ICurrencyConverter currencyConverter)
+        public AccountService(IAccountRepository accountRepository, ITransferRepository transferRepository, IUserService userService, ICurrencyConverter currencyConverter, IUnitOfWork unitOfWork)
         {
             _accountRepository = accountRepository;
-            _transferService = transferService;
+            _transferRepository = transferRepository;
             _userService = userService;
             _currencyConverter = currencyConverter;
+            _unitOfWork = unitOfWork;
         }
 
-        public decimal CalculateCommission(decimal amount, int fromAccountId, int toAccountId)
+        public async Task<decimal> CalculateCommissionAsync(decimal amount, int fromAccountId, int toAccountId)
         {
             if (fromAccountId == toAccountId)
             {
                 throw new ValidationException("accounts are equals");
             }
 
-            var fromAccount = _accountRepository.Get(fromAccountId);
-            var toAccount = _accountRepository.Get(toAccountId);
-            
-            if (fromAccount.IsActive && toAccount.IsActive)
+            var fromAccount = await _accountRepository.GetAsync(fromAccountId);
+            var toAccount = await _accountRepository.GetAsync(toAccountId);
+
+            if (!fromAccount.IsActive || !toAccount.IsActive)
             {
-                if (fromAccount.UserId == toAccount.UserId)
-                {
-                    return 0;
-                }
-                return Decimal.Round(amount * COMMISSION_MULTIPLIER, DECIMAL_PLACES);
+                throw new ValidationException("accounts not active");
             }
 
-            throw new ValidationException("accounts not active");
+            return fromAccount.UserId == toAccount.UserId
+                ? 0
+                : decimal.Round(amount * CommissionMultiplier, DecimalPlaces);
         }
 
-        public void Close(int id)
+        public async Task CloseAsync(int id)
         {
-            var account = _accountRepository.Get(id);
+            var account = await _accountRepository.GetAsync(id);
 
             if (account.Money != 0)
             {
                 throw new ValidationException("not zero balance");
             }
 
-            _accountRepository.Delete(id);
+            await _accountRepository.CloseAsync(id);
+            
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        public void ChangeMoney(int id, decimal delta)
+        public async Task AddMoneyAsync(int id, decimal delta)
         {
-            var account = _accountRepository.Get(id);
+            var account = await _accountRepository.GetAsync(id);
             
             if (!account.IsActive)
             {
@@ -78,16 +82,13 @@ namespace Minibank.Core.Domains.Accounts.Services
                 throw new ValidationException("balance cannot be lower than zero");
             }
 
-            _accountRepository.Update(
-                id, 
-                new Account{ Money = account.Money + delta }, 
-                isMoneyUpdating: true);
+            await _accountRepository.AddMoneyAsync(id, delta);
+            
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        public int Create(int userId, string currencyCode)
+        public async Task CreateAsync(int userId, string currencyCode)
         {
-            _userService.Get(userId);
-
             currencyCode = Currency.Validate(currencyCode);
 
             if (currencyCode == null)
@@ -95,28 +96,45 @@ namespace Minibank.Core.Domains.Accounts.Services
                 throw new ValidationException("invalid currency");
             }
 
-            return _accountRepository.Create(userId, currencyCode);
+            _accountRepository.Create(userId, currencyCode);
+
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        public void DoTransfer(decimal amount, int fromAccountId, int toAccountId)
+        public async Task DoTransferAsync(decimal amount, int fromAccountId, int toAccountId)
         {
-            ChangeMoney(fromAccountId, -amount);
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
 
-            var commission = CalculateCommission(amount, fromAccountId, toAccountId);
-            var fromAccount = _accountRepository.Get(toAccountId);
-            var toAccount = _accountRepository.Get(toAccountId);
-            
-            amount = _currencyConverter.Convert(amount - commission, fromAccount.CurrencyCode, toAccount.CurrencyCode);
+                await AddMoneyAsync(fromAccountId, -amount);
 
-            ChangeMoney(toAccountId, amount);
+                var commission = await CalculateCommissionAsync(amount, fromAccountId, toAccountId);
+                var fromAccount = await _accountRepository.GetAsync(fromAccountId);
+                var toAccount = await _accountRepository.GetAsync(toAccountId);
 
-            _transferService.Log(
-                new() {
-                    Money = toAccount.Money + amount - commission,
-                    CurrencyCode = fromAccount.CurrencyCode,
-                    FromAccountId = fromAccountId,
-                    ToAccountId = toAccountId,
-                });
+                amount = _currencyConverter
+                    .Convert(amount - commission, fromAccount.CurrencyCode, toAccount.CurrencyCode);
+
+                await AddMoneyAsync(toAccountId, amount);
+
+                _transferRepository.Create(
+                    new Transfer
+                    {
+                        Money = amount,
+                        CurrencyCode = toAccount.CurrencyCode,
+                        FromAccountId = fromAccountId,
+                        ToAccountId = toAccountId,
+                    });
+
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch
+            {
+                _unitOfWork.DeleteTransaction();
+                throw new ValidationException("transfer failed");
+            }
         }
     }
 }

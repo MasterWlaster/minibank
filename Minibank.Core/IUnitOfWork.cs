@@ -9,5 +9,9 @@ namespace Minibank.Core
     public interface IUnitOfWork
     {
         int SaveChanges();
+        Task<int> SaveChangesAsync();
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        void DeleteTransaction();
     }
 }

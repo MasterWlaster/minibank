@@ -26,13 +26,17 @@ namespace Minibank.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(Context).Assembly);
+            
             base.OnModelCreating(modelBuilder);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseLazyLoadingProxies();
-            optionsBuilder.LogTo(Console.WriteLine);
+            optionsBuilder
+                .UseLazyLoadingProxies()
+                .UseSnakeCaseNamingConvention()
+                .LogTo(Console.WriteLine);
+            
             base.OnConfiguring(optionsBuilder);
         }
     }

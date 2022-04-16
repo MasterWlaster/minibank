@@ -8,9 +8,9 @@ namespace Minibank.Core.Domains.Users.Services
 {
     public interface IUserService
     {
-        int Create(User data);
-        User Get(int id);
-        void Update(int id, User data);
-        void Delete(int id);
+        Task CreateAsync(User data);
+        Task<User> GetAsync(int id);
+        Task UpdateAsync(int id, User data);
+        Task DeleteAsync(int id);
     }
 }

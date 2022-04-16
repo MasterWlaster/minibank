@@ -27,31 +27,14 @@ namespace Minibank.Data.Transfers
             public void Configure(EntityTypeBuilder<TransferDbModel> builder)
             {
                 //id
-                builder.Property(it => it.Id)
-                    .HasColumnName("id");
-
-                builder.HasKey(it => it.Id);//.HasName("pk_id");
-
-                //money
-                builder.Property(it => it.Money)
-                    .HasColumnName("money");
-
-                //currency_code
-                builder.Property(it => it.CurrencyCode)
-                    .HasColumnName("currency_code");
+                builder.HasKey(it => it.Id);
 
                 //from_account_id
-                builder.Property(it => it.FromAccountId)
-                    .HasColumnName("from_account_id");
-
                 builder.HasOne(it => it.FromAccount)
                     .WithMany()
                     .HasForeignKey(it => it.FromAccountId);
 
                 //to_account_id
-                builder.Property(it => it.ToAccountId)
-                    .HasColumnName("to_account_id");
-
                 builder.HasOne(it => it.ToAccount)
                     .WithMany()
                     .HasForeignKey(it => it.ToAccountId);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Storage;
 using Minibank.Core.Domains.Transfers;
 using Minibank.Core.Domains.Transfers.Repositories;
 
@@ -17,7 +18,7 @@ namespace Minibank.Data.Transfers.Repositories
             _context = context;
         }
 
-        public int Create(Transfer data)
+        public void Create(Transfer data)
         {
             var entity = new TransferDbModel()
             {
@@ -28,8 +29,6 @@ namespace Minibank.Data.Transfers.Repositories
             };
 
             _context.Transfers.Add(entity);
-
-            return 0; //todo return id
         }
     }
 }

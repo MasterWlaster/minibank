@@ -19,47 +19,54 @@ namespace Minibank.Data.Users.Repositories
             _context = context;
         }
         
-        public int Create(User data)
+        public void Create(User data)
         {
             var entity = new UserDbModel()
             {
                 Login = data.Login,
                 Email = data.Email,
             };
+            
+            //await using var transaction = await _context.Database.BeginTransactionAsync();
+            //
+            //_context.Users.Add(entity);
+            //
+            //await _context.SaveChangesAsync();
+            //
+            //await transaction.CommitAsync();
+            //
+            //return entity.Id;
 
             _context.Users.Add(entity);
-
-            return 0; //todo return id
         }
 
-        public User Get(int id)
+        public async Task<User> GetAsync(int id)
         {
-            var entity = _context.Users
+            var entity = await _context.Users
                 .AsNoTracking()
-                .FirstOrDefault(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             return entity == null ? null : MapperUserDb.ToUser(entity);
         }
 
-        public void Update(int id, User data)
+        public async Task UpdateAsync(int id, User data)
         {
-            var entity = _context.Users.FirstOrDefault(it => it.Id == id);
+            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Id == id);
 
             if (entity == null)
             {
                 return;
             }
 
-            entity.Login = data.Login;
-            entity.Email = data.Email;
+            entity.Login = data.Login ?? data.Login;
+            entity.Email = data.Email ?? data.Email;
 
-            //todo updating
-            //_context.Users.Update(entity);
+            _context.Users.Update(entity);
         }
 
-        public void Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            var entity = _context.Users.FirstOrDefault(it => it.Id == id);
+            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Id == id);
 
             if (entity == null)
             {

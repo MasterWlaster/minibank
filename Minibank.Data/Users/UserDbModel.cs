@@ -25,27 +25,7 @@ namespace Minibank.Data.Users
             public void Configure(EntityTypeBuilder<UserDbModel> builder)
             {
                 //id
-                builder.Property(it => it.Id)
-                    .HasColumnName("id");
-
-                builder.HasKey(it => it.Id);//.HasName("pk_id");
-
-                //login
-                builder.Property(it => it.Login)
-                    .HasColumnName("login");
-
-                //email
-                builder.Property(it => it.Email)
-                    .HasColumnName("email");
-
-                //builder.Ignore
-
-                //dotnet ef database update
-                //dotnet ef migrations add Initial
-
-                //builder.HasOne(it => it.User)
-                //    .WithMany(iterator => iterator.Message)
-                //    .HasForeignKey(iterator => iterator.UserId);
+                builder.HasKey(it => it.Id);
             }
         }
     }

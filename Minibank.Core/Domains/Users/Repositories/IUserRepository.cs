@@ -8,9 +8,9 @@ namespace Minibank.Core.Domains.Users.Repositories
 {
     public interface IUserRepository
     {
-        int Create(User data);
-        User Get(int id);
-        void Update(int id, User data);
-        void Delete(int id);
+        void Create(User data);
+        Task<User> GetAsync(int id);
+        Task UpdateAsync(int id, User data);
+        Task DeleteAsync(int id);
     }
 }
