@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Minibank.Core.Domains.Transfers.Services
 {
-    public interface ITransferService
+    /*public interface ITransferService
     {
         Task LogAsync(Transfer data);
-    }
+    }*/
 }

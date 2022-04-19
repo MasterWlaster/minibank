@@ -16,40 +16,39 @@ namespace Minibank.Data.Exchanges
 {
     public class ExchangeRateProvider : IExchangeRateProvider
     {
-        //private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
 
-        public ExchangeRateProvider(IConfiguration configuration, HttpClient httpClient)
+        public ExchangeRateProvider(HttpClient httpClient)
         {
-            //_httpClientFactory = httpClientFactory;
-            _configuration = configuration;
             _httpClient = httpClient;
         }
 
-        public decimal RateOf(string currencyCode)
+        public async Task<decimal> GetRateAsync(string currencyCode)
         {
-            return GetRate(currencyCode.Trim().ToUpper());
+            return await GetRateFromJsonAsync(currencyCode.Trim().ToUpper());
         }
 
-        decimal GetRate(string currencyCode)
+        private async Task<decimal> GetRateFromJsonAsync(string currencyCode)
         {
             if (currencyCode == Currency.DefaultCurrency)
             {
                 return 1;
             }
 
-            var response = _httpClient
-                .GetFromJsonAsync<ExchangeRateResponse>("daily_json.js")
-                .GetAwaiter()
-                .GetResult();
+            var response = await _httpClient
+                .GetFromJsonAsync<ExchangeRateResponse>("daily_json.js");
 
-            if (response.Valute.ContainsKey(currencyCode))
+            if (response == null)
             {
-                return response.Valute[currencyCode].Value;
+                throw new ValidationException("empty response");
             }
 
-            throw new ValidationException("Unknown currency code");
+            if (!response.Valute.ContainsKey(currencyCode))
+            {
+                throw new ValidationException("unknown currency code");
+            }
+
+            return response.Valute[currencyCode].Value;
         }
     }
 }

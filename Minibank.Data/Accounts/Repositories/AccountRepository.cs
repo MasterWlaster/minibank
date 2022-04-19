@@ -65,6 +65,8 @@ namespace Minibank.Data.Accounts.Repositories
                 return;
             }
 
+            entity.Money += delta;
+
             _context.Accounts.Update(entity);
         }
 
@@ -77,6 +79,9 @@ namespace Minibank.Data.Accounts.Repositories
             {
                 return;
             }
+
+            entity.IsActive = false;
+            entity.CloseDate = DateTime.UtcNow;
 
             _context.Accounts.Update(entity);
         }

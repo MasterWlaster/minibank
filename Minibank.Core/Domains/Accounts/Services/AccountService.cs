@@ -18,18 +18,16 @@ namespace Minibank.Core.Domains.Accounts.Services
     {
         private readonly IAccountRepository _accountRepository;
         private readonly ITransferRepository _transferRepository;
-        private readonly IUserService _userService;
         private readonly ICurrencyConverter _currencyConverter;
         private readonly IUnitOfWork _unitOfWork;
 
-        const decimal CommissionMultiplier = 0.02m;
-        const int DecimalPlaces = 2;
+        private const decimal CommissionMultiplier = 0.02m;
+        private const int DecimalPlaces = 2;
 
-        public AccountService(IAccountRepository accountRepository, ITransferRepository transferRepository, IUserService userService, ICurrencyConverter currencyConverter, IUnitOfWork unitOfWork)
+        public AccountService(IAccountRepository accountRepository, ITransferRepository transferRepository, ICurrencyConverter currencyConverter, IUnitOfWork unitOfWork)
         {
             _accountRepository = accountRepository;
             _transferRepository = transferRepository;
-            _userService = userService;
             _currencyConverter = currencyConverter;
             _unitOfWork = unitOfWork;
         }
@@ -46,7 +44,7 @@ namespace Minibank.Core.Domains.Accounts.Services
 
             if (!fromAccount.IsActive || !toAccount.IsActive)
             {
-                throw new ValidationException("accounts not active");
+                throw new ValidationException("not active accounts");
             }
 
             return fromAccount.UserId == toAccount.UserId
@@ -58,9 +56,19 @@ namespace Minibank.Core.Domains.Accounts.Services
         {
             var account = await _accountRepository.GetAsync(id);
 
+            if (account == null)
+            {
+                return;
+            }
+
+            if (!account.IsActive)
+            {
+                return;
+            }
+
             if (account.Money != 0)
             {
-                throw new ValidationException("not zero balance");
+                throw new ValidationException("not 0 balance");
             }
 
             await _accountRepository.CloseAsync(id);
@@ -71,7 +79,12 @@ namespace Minibank.Core.Domains.Accounts.Services
         public async Task AddMoneyAsync(int id, decimal delta)
         {
             var account = await _accountRepository.GetAsync(id);
-            
+
+            if (account == null)
+            {
+                throw new ValidationException("account not found");
+            }
+
             if (!account.IsActive)
             {
                 throw new ValidationException("account not active");
@@ -79,7 +92,7 @@ namespace Minibank.Core.Domains.Accounts.Services
 
             if (account.Money + delta < 0)
             {
-                throw new ValidationException("balance cannot be lower than zero");
+                throw new ValidationException("balance cannot be lower than 0");
             }
 
             await _accountRepository.AddMoneyAsync(id, delta);
@@ -110,11 +123,12 @@ namespace Minibank.Core.Domains.Accounts.Services
                 await AddMoneyAsync(fromAccountId, -amount);
 
                 var commission = await CalculateCommissionAsync(amount, fromAccountId, toAccountId);
+                
                 var fromAccount = await _accountRepository.GetAsync(fromAccountId);
                 var toAccount = await _accountRepository.GetAsync(toAccountId);
 
-                amount = _currencyConverter
-                    .Convert(amount - commission, fromAccount.CurrencyCode, toAccount.CurrencyCode);
+                amount = await _currencyConverter
+                    .ConvertAsync(amount - commission, fromAccount.CurrencyCode, toAccount.CurrencyCode);
 
                 await AddMoneyAsync(toAccountId, amount);
 
@@ -130,9 +144,9 @@ namespace Minibank.Core.Domains.Accounts.Services
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
             }
-            catch
+            catch 
             {
-                _unitOfWork.DeleteTransaction();
+                _unitOfWork.CancelTransaction();
                 throw new ValidationException("transfer failed");
             }
         }

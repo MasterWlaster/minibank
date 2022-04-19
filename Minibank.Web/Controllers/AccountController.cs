@@ -45,6 +45,7 @@ namespace Minibank.Web.Controllers
         /// Change Money
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="delta"></param>
         [HttpPost("change_money")]
         public async Task ChangeMoney(int id, decimal delta)
         {

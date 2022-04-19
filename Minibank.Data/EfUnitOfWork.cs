@@ -48,9 +48,14 @@ namespace Minibank.Data
 
         public void DeleteTransaction()
         {
-            transaction.Rollback();
             transaction.Dispose();
             transaction = null;
+        }
+
+        public void CancelTransaction()
+        {
+            transaction.Rollback();
+            DeleteTransaction();
         }
 
         /*public async Task DoTransactionAsync(Task task)

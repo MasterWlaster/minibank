@@ -58,8 +58,8 @@ namespace Minibank.Data.Users.Repositories
                 return;
             }
 
-            entity.Login = data.Login ?? data.Login;
-            entity.Email = data.Email ?? data.Email;
+            entity.Login = data.Login ?? entity.Login;
+            entity.Email = data.Email ?? entity.Email;
 
             _context.Users.Update(entity);
         }

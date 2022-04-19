@@ -10,6 +10,6 @@ namespace Minibank.Core.Exchanges
     {
         /// <param name="fromCurrency">Сurrency code to convert from</param>
         /// <param name="intoCurrency">Currency code to convert into</param>
-        decimal Convert(decimal value, string fromCurrency, string intoCurrency);
+        Task<decimal> ConvertAsync(decimal value, string fromCurrency, string intoCurrency);
     }
 }

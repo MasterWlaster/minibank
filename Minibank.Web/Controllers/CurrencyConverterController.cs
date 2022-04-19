@@ -21,7 +21,7 @@ namespace Minibank.Web.Controllers
         [HttpGet]
         public async Task<decimal> Convert(int amount, string fromCurrency, string toCurrency)
         {
-            return  _currencyConverter.Convert(amount, fromCurrency, toCurrency);
+            return await _currencyConverter.ConvertAsync(amount, fromCurrency, toCurrency);
         }
     }
 }

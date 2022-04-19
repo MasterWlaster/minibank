@@ -53,7 +53,6 @@ namespace Minibank.Web
             }
 
             app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMiddleware<ValidationExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 

@@ -8,6 +8,6 @@ namespace Minibank.Core.Exchanges
 {
     public interface IExchangeRateProvider
     {
-        decimal RateOf(string currencyCode);
+        Task<decimal> GetRateAsync(string currencyCode);
     }
 }
