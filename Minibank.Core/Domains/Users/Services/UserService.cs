@@ -36,6 +36,13 @@ namespace Minibank.Core.Domains.Users.Services
 
         public async Task DeleteAsync(int id)
         {
+            var user = await _userRepository.GetAsync(id);
+
+            if (user == null)
+            {
+                return;
+            }
+
             if (await _accountRepository.ExistsWithUserAsync(id))
             {
                 throw new ValidationException("user has active accounts");
@@ -60,6 +67,13 @@ namespace Minibank.Core.Domains.Users.Services
 
         public async Task UpdateAsync(int id, User data)
         {
+            var user = await _userRepository.GetAsync(id);
+
+            if (user == null)
+            {
+                throw new ValidationException("user not found");
+            }
+
             await _userRepository.UpdateAsync(id, data);
             
             await _unitOfWork.SaveChangesAsync();
