@@ -12,6 +12,7 @@ namespace Minibank.Core
         Task<int> SaveChangesAsync();
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
         Task DisposeTransactionAsync();
     }
 }

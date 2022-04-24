@@ -39,6 +39,11 @@ namespace Minibank.Data
             await _transaction.CommitAsync();
         }
 
+        public async Task RollbackTransactionAsync()
+        {
+            await _transaction.RollbackAsync();
+        }
+
         public async Task DisposeTransactionAsync()
         {
             await _transaction.DisposeAsync();
