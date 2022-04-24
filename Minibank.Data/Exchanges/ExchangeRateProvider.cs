@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading;
 using Minibank.Core.Exceptions;
 using Minibank.Data.Exchanges.Models;
 using Minibank.Core.Exchanges;
@@ -23,12 +24,12 @@ namespace Minibank.Data.Exchanges
             _httpClient = httpClient;
         }
 
-        public async Task<decimal> GetRateAsync(string currencyCode)
+        public async Task<decimal> GetRateAsync(string currencyCode, CancellationToken cancellationToken)
         {
-            return await GetRateFromJsonAsync(currencyCode.Trim().ToUpper());
+            return await GetRateFromJsonAsync(currencyCode.Trim().ToUpper(), cancellationToken);
         }
 
-        private async Task<decimal> GetRateFromJsonAsync(string currencyCode)
+        private async Task<decimal> GetRateFromJsonAsync(string currencyCode, CancellationToken cancellationToken)
         {
             if (currencyCode == Currency.DefaultCurrency)
             {
@@ -36,7 +37,7 @@ namespace Minibank.Data.Exchanges
             }
 
             var response = await _httpClient
-                .GetFromJsonAsync<ExchangeRateResponse>("daily_json.js");
+                .GetFromJsonAsync<ExchangeRateResponse>("daily_json.js", cancellationToken);
 
             if (response == null)
             {

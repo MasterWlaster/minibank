@@ -12,7 +12,7 @@ namespace Minibank.Data
     public class EfUnitOfWork : IUnitOfWork
     {
         private readonly Context _context;
-        private IDbContextTransaction transaction;
+        private IDbContextTransaction _transaction;
 
         public EfUnitOfWork(Context context)
         {
@@ -31,51 +31,18 @@ namespace Minibank.Data
 
         public async Task BeginTransactionAsync()
         {
-            transaction = await _context.Database.BeginTransactionAsync();
+            _transaction = await _context.Database.BeginTransactionAsync();
         }
 
         public async Task CommitTransactionAsync()
         {
-            if (transaction == null)
-            {
-                throw new Exception("empty transaction");
-            }
-
-            await transaction.CommitAsync();
-
-            DeleteTransaction();
+            await _transaction.CommitAsync();
         }
 
-        public void DeleteTransaction()
+        public async Task DisposeTransactionAsync()
         {
-            transaction.Dispose();
-            transaction = null;
+            await _transaction.DisposeAsync();
+            _transaction = null;
         }
-
-        public void CancelTransaction()
-        {
-            transaction.Rollback();
-            DeleteTransaction();
-        }
-
-        /*public async Task DoTransactionAsync(Task task)
-        {
-            await BeginTransactionAsync();
-
-            try
-            {
-                task.Start();
-
-                await CommitTransactionAsync();
-            }
-            catch (Exception e)
-            {
-                //
-            }
-            finally
-            {
-                DeleteTransaction();
-            }
-        }*/
     }
 }

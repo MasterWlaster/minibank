@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Minibank.Core.Domains.Users;
@@ -19,7 +20,7 @@ namespace Minibank.Data.Users.Repositories
             _context = context;
         }
         
-        public void Create(User data)
+        public void Create(User data, CancellationToken cancellationToken)
         {
             var entity = new UserDbModel()
             {
@@ -27,31 +28,22 @@ namespace Minibank.Data.Users.Repositories
                 Email = data.Email,
             };
             
-            //await using var transaction = await _context.Database.BeginTransactionAsync();
-            //
-            //_context.Users.Add(entity);
-            //
-            //await _context.SaveChangesAsync();
-            //
-            //await transaction.CommitAsync();
-            //
-            //return entity.Id;
-
             _context.Users.Add(entity);
         }
 
-        public async Task<User> GetAsync(int id)
+        public async Task<User> GetAsync(int id, CancellationToken cancellationToken)
         {
             var entity = await _context.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
             return entity == null ? null : MapperUserDb.ToUser(entity);
         }
 
-        public async Task UpdateAsync(int id, User data)
+        public async Task UpdateAsync(int id, User data, CancellationToken cancellationToken)
         {
-            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Id == id);
+            var entity = await 
+                _context.Users.FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
             if (entity == null)
             {
@@ -64,9 +56,10 @@ namespace Minibank.Data.Users.Repositories
             _context.Users.Update(entity);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            var entity = await _context.Users.FirstOrDefaultAsync(it => it.Id == id);
+            var entity = await _context.Users
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
             if (entity == null)
             {
@@ -74,6 +67,11 @@ namespace Minibank.Data.Users.Repositories
             }
 
             _context.Users.Remove(entity);
+        }
+
+        public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken)
+        {
+            return await _context.Users.AnyAsync(it => it.Id == id, cancellationToken);
         }
     }
 }

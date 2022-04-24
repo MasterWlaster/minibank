@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using Minibank.Core.Domains.Users.Repositories;
@@ -25,37 +26,35 @@ namespace Minibank.Core.Domains.Users.Services
             _userValidator = userValidator;
         }
 
-        public async Task CreateAsync(User data)
+        public async Task CreateAsync(User data, CancellationToken cancellationToken)
         {
-            await _userValidator.ValidateAndThrowAsync(data);
+            await _userValidator.ValidateAndThrowAsync(data, cancellationToken);
             
-            _userRepository.Create(data);
+            _userRepository.Create(data, cancellationToken);
 
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            var user = await _userRepository.GetAsync(id);
-
-            if (user == null)
+            if (!await _userRepository.ExistsAsync(id, cancellationToken))
             {
                 return;
             }
 
-            if (await _accountRepository.ExistsWithUserAsync(id))
+            if (await _accountRepository.IsActiveWithUserAsync(id, cancellationToken))
             {
                 throw new ValidationException("user has active accounts");
             }
 
-            await _userRepository.DeleteAsync(id);
+            await _userRepository.DeleteAsync(id, cancellationToken);
             
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<User> GetAsync(int id)
+        public async Task<User> GetAsync(int id, CancellationToken cancellationToken)
         {
-            var user = await _userRepository.GetAsync(id);
+            var user = await _userRepository.GetAsync(id, cancellationToken);
 
             if (user == null)
             {
@@ -65,16 +64,14 @@ namespace Minibank.Core.Domains.Users.Services
             return user;
         }
 
-        public async Task UpdateAsync(int id, User data)
+        public async Task UpdateAsync(int id, User data, CancellationToken cancellationToken)
         {
-            var user = await _userRepository.GetAsync(id);
-
-            if (user == null)
+            if (!await _userRepository.ExistsAsync(id, cancellationToken))
             {
                 throw new ValidationException("user not found");
             }
 
-            await _userRepository.UpdateAsync(id, data);
+            await _userRepository.UpdateAsync(id, data, cancellationToken);
             
             await _unitOfWork.SaveChangesAsync();
         }

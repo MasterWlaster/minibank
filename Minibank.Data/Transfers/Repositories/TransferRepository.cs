@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
 using Minibank.Core.Domains.Transfers;
@@ -18,7 +19,7 @@ namespace Minibank.Data.Transfers.Repositories
             _context = context;
         }
 
-        public void Create(Transfer data)
+        public void Create(Transfer data, CancellationToken cancellationToken)
         {
             var entity = new TransferDbModel()
             {
