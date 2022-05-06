@@ -20,7 +20,7 @@ namespace Minibank.Data.Accounts.Repositories
             _context = context;
         }
         
-        public void Create(int userId, string currencyCode, CancellationToken cancellationToken)
+        public void Create(int userId, string currencyCode)
         {
             var entity = new AccountDbModel()
             {

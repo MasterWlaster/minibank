@@ -19,7 +19,7 @@ namespace Minibank.Data.Transfers.Repositories
             _context = context;
         }
 
-        public void Create(Transfer data, CancellationToken cancellationToken)
+        public void Create(Transfer data)
         {
             var entity = new TransferDbModel()
             {

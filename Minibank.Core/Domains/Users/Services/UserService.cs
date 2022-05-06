@@ -30,7 +30,7 @@ namespace Minibank.Core.Domains.Users.Services
         {
             await _userValidator.ValidateAndThrowAsync(data, cancellationToken);
             
-            _userRepository.Create(data, cancellationToken);
+            _userRepository.Create(data);
 
             await _unitOfWork.SaveChangesAsync();
         }

@@ -10,6 +10,6 @@ namespace Minibank.Core.Domains.Transfers.Repositories
 {
     public interface ITransferRepository
     {
-        void Create(Transfer data, CancellationToken cancellationToken);
+        void Create(Transfer data);
     }
 }

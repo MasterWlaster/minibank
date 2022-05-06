@@ -114,7 +114,7 @@ namespace Minibank.Core.Domains.Accounts.Services
                 throw new ValidationException("invalid currency");
             }
 
-            _accountRepository.Create(userId, currencyCode, cancellationToken);
+            _accountRepository.Create(userId, currencyCode);
 
             await _unitOfWork.SaveChangesAsync();
         }
@@ -148,7 +148,7 @@ namespace Minibank.Core.Domains.Accounts.Services
                         CurrencyCode = toAccount.CurrencyCode,
                         FromAccountId = fromAccountId,
                         ToAccountId = toAccountId,
-                    }, cancellationToken);
+                    });
 
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();

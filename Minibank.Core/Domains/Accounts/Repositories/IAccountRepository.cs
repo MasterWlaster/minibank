@@ -9,7 +9,7 @@ namespace Minibank.Core.Domains.Accounts.Repositories
 {
     public interface IAccountRepository
     {
-        void Create(int userId, string currencyCode, CancellationToken cancellationToken);
+        void Create(int userId, string currencyCode);
         Task<Account> GetAsync(int id, CancellationToken cancellationToken);
         Task AddMoneyAsync(int id, decimal delta, CancellationToken cancellationToken);
         Task CloseAsync(int id, CancellationToken cancellationToken);
