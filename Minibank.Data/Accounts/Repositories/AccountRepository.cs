@@ -2,91 +2,95 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Minibank.Core.Exceptions;
-using Minibank.Core.Helpers;
-using Minibank.Core.Domains.Users.Services;
-using Minibank.Data.Accounts.Helpers;
+using Microsoft.EntityFrameworkCore;
 using Minibank.Core.Domains.Accounts;
 using Minibank.Core.Domains.Accounts.Repositories;
+using Minibank.Data.Accounts.Helpers;
 
 namespace Minibank.Data.Accounts.Repositories
 {
     public class AccountRepository : IAccountRepository
     {
-        static Dictionary<int, AccountDbModel> id2Account = new();
-        static Dictionary<int, List<int>> userId2AccountIds = new();
-        static int lastId = 0;
+        private readonly Context _context;
 
-        public int Create(int userId, string currencyCode)
+        public AccountRepository(Context context)
         {
-            int id = NewId();
-
-            id2Account.Add(
-                id,
-                new() { 
-                    Id = id,
-                    UserId = userId,
-                    CurrencyCode = currencyCode,
-                    IsActive = true,
-                    Money = 0,
-                    OpenDate = DateTime.UtcNow,
-                });
-
-            if (!userId2AccountIds.ContainsKey(userId))
+            _context = context;
+        }
+        
+        public void Create(int userId, string currencyCode)
+        {
+            var entity = new AccountDbModel()
             {
-                userId2AccountIds[userId] = new();
-            }
-            userId2AccountIds[userId].Add(id);
+                UserId = userId,
+                CurrencyCode = currencyCode,
+                Money = 0,
+                IsActive = true,
+                OpenDate = DateTime.UtcNow,
+            };
 
-            return id;
+            _context.Accounts.Add(entity);
         }
 
-        public void Delete(int id)
+        public async Task<Account> GetAsync(int id, CancellationToken cancellationToken)
         {
-            var account = GetModel(id);
+            var entity = await _context.Accounts
+                .AsNoTracking()
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
-            id2Account.Remove(id);
-            userId2AccountIds[account.UserId].Remove(id);            
+            return entity == null ? null : MapperAccountDb.ToAccount(entity);
         }
 
-        public Account Get(int id)
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            return MapperAccountDb.ToAccount(GetModel(id));
-        }
+            var entity = await _context.Accounts
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
-        public void Update(int id, Account data, bool isMoneyUpdating = false)
-        {
-            var model = GetModel(id);
-
-            if (isMoneyUpdating)
+            if (entity == null)
             {
-                model.Money = data.Money;
-            }
-        }
-
-        public bool ExistsWithUser(int userId)
-        {
-            var list = userId2AccountIds[userId];
-
-            return list != null && list.Count > 0;
-        }
-
-        int NewId()
-        {
-            return ++lastId;
-        }
-
-        AccountDbModel GetModel(int id)
-        {
-            AccountDbModel model;
-
-            if (!id2Account.TryGetValue(id, out model))
-            {
-                throw new ValidationException("account not found");
+                return;
             }
 
-            return model;
+            _context.Accounts.Remove(entity);
+        }
+
+        public async Task AddMoneyAsync(int id, decimal delta, CancellationToken cancellationToken)
+        {
+            var entity = await _context.Accounts
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
+
+            if (entity == null)
+            {
+                return;
+            }
+
+            entity.Money += delta;
+
+            _context.Accounts.Update(entity);
+        }
+
+        public async Task CloseAsync(int id, CancellationToken cancellationToken)
+        {
+            var entity = await _context.Accounts
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
+
+            if (entity == null)
+            {
+                return;
+            }
+
+            entity.IsActive = false;
+            entity.CloseDate = DateTime.UtcNow;
+
+            _context.Accounts.Update(entity);
+        }
+
+        public async Task<bool> IsActiveWithUserAsync(int userId, CancellationToken cancellationToken)
+        {
+            return await _context.Accounts
+                .AnyAsync(it => it.UserId == userId && it.IsActive, cancellationToken);
         }
     }
 }

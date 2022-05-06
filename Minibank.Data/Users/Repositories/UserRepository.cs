@@ -2,62 +2,76 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Minibank.Core.Domains.Users;
 using Minibank.Core.Domains.Users.Repositories;
 using Minibank.Data.Users.Helpers;
-using Minibank.Core.Exceptions;
 
 namespace Minibank.Data.Users.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        static Dictionary<int, UserDbModel> id2User = new();
-        static int lastId = 0;
+        private readonly Context _context;
+
+        public UserRepository(Context context)
+        {
+            _context = context;
+        }
         
-        public int Create(User data)
+        public void Create(User data)
         {
-            int id = NewId();
-
-            data.Id = id;
-            id2User[id] = MapperUserDb.ToUserDbModel(data);
-
-            return id;
-        }
-
-        public void Delete(int id)
-        {
-            id2User.Remove(id);
-        }
-
-        public User Get(int id)
-        {
-            return MapperUserDb.ToUser(GetModel(id));
-        }
-
-        public void Update(int id, User data)
-        {
-            var user = GetModel(id);
-
-            user.Login = data.Login ?? user.Login;
-            user.Email = data.Email ?? user.Email;
-        }
-
-        int NewId()
-        {
-            return ++lastId;
-        }
-
-        UserDbModel GetModel(int id)
-        {
-            UserDbModel model;
-
-            if (!id2User.TryGetValue(id, out model))
+            var entity = new UserDbModel()
             {
-                throw new ValidationException("user not found");
+                Login = data.Login,
+                Email = data.Email,
+            };
+            
+            _context.Users.Add(entity);
+        }
+
+        public async Task<User> GetAsync(int id, CancellationToken cancellationToken)
+        {
+            var entity = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            return entity == null ? null : MapperUserDb.ToUser(entity);
+        }
+
+        public async Task UpdateAsync(int id, User data, CancellationToken cancellationToken)
+        {
+            var entity = await 
+                _context.Users.FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
+
+            if (entity == null)
+            {
+                return;
             }
 
-            return model;
+            entity.Login = data.Login ?? entity.Login;
+            entity.Email = data.Email ?? entity.Email;
+
+            _context.Users.Update(entity);
+        }
+
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken)
+        {
+            var entity = await _context.Users
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
+
+            if (entity == null)
+            {
+                return;
+            }
+
+            _context.Users.Remove(entity);
+        }
+
+        public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken)
+        {
+            return await _context.Users.AnyAsync(it => it.Id == id, cancellationToken);
         }
     }
 }

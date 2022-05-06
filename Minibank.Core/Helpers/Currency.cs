@@ -8,7 +8,7 @@ namespace Minibank.Core.Helpers
 {
     public static class Currency
     {
-        private readonly static List<string> currencies = new(){ "RUB", "USD", "EUR"};
+        private static readonly List<string> currencies = new(){ "RUB", "USD", "EUR"};
 
         public static string DefaultCurrency => "RUB";
         
@@ -21,24 +21,14 @@ namespace Minibank.Core.Helpers
         {
             currencyCode = Validate(currencyCode);
 
-            if (currencyCode == null)
-            {
-                return false;
-            }
-
-            return true;
+            return currencyCode != null;
         }
         
         public static string Validate(string currencyCode)
         {
             currencyCode = Normalize(currencyCode);
 
-            if (!currencies.Contains(currencyCode))
-            {
-                return null;
-            }
-
-            return currencyCode;
+            return !currencies.Contains(currencyCode) ? null : currencyCode;
         }
     }
 }

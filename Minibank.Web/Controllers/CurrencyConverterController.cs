@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Minibank.Core.Exchanges;
@@ -19,9 +20,9 @@ namespace Minibank.Web.Controllers
         }
 
         [HttpGet]
-        public decimal Convert(int amount, string fromCurrency, string toCurrency)
+        public async Task<decimal> Convert(int amount, string fromCurrency, string toCurrency, CancellationToken cancellationToken)
         {
-            return _currencyConverter.Convert(amount, fromCurrency, toCurrency);
+            return await _currencyConverter.ConvertAsync(amount, fromCurrency, toCurrency, cancellationToken);
         }
     }
 }

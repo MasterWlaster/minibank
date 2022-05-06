@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Minibank.Core.Exceptions;
 
@@ -11,12 +12,12 @@ namespace Minibank.Core.Exchanges
     {
         private readonly IExchangeRateProvider _exchangeRateProvider;
 
-        public CurrencyConverter(IExchangeRateProvider excangeRateProvider)
+        public CurrencyConverter(IExchangeRateProvider exchangeRateProvider)
         {
-            _exchangeRateProvider = excangeRateProvider;
+            _exchangeRateProvider = exchangeRateProvider;
         }
 
-        public decimal Convert(decimal value, string fromCurrency, string intoCurrency)
+        public async Task<decimal> ConvertAsync(decimal value, string fromCurrency, string intoCurrency, CancellationToken cancellationToken)
         {
             if (value < 0)
             {
@@ -25,8 +26,8 @@ namespace Minibank.Core.Exchanges
 
             return 
                 value * 
-                _exchangeRateProvider.RateOf(fromCurrency) / 
-                _exchangeRateProvider.RateOf(intoCurrency);
+                await _exchangeRateProvider.GetRateAsync(fromCurrency, cancellationToken) /
+                await _exchangeRateProvider.GetRateAsync(intoCurrency, cancellationToken);
         }
     }
 }

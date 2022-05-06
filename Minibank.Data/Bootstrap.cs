@@ -13,8 +13,10 @@ using Minibank.Data.Users.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Minibank.Data.Exchanges;
+using Microsoft.EntityFrameworkCore;
 using System.Configuration;
 using System.Net.Http;
+using Minibank.Core;
 
 namespace Minibank.Data
 {
@@ -25,8 +27,16 @@ namespace Minibank.Data
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ITransferRepository, TransferRepository>();
             services.AddScoped<IAccountRepository, AccountRepository>();
+
+            services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+            
             services.AddHttpClient<IExchangeRateProvider, ExchangeRateProvider>(
-                client => { client.BaseAddress = new Uri(configuration["ExchangesCbRussia"]); });
+                client => client.BaseAddress = new Uri(configuration["ExchangesCbRussia"]));
+            
+            services.AddDbContext<Context>(
+                options => options
+                    .UseLazyLoadingProxies()
+                    .UseNpgsql(configuration["DbConnectionString"]));
             
             return services;
         }

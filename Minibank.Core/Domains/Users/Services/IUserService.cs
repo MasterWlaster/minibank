@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Minibank.Core.Domains.Users.Services
 {
     public interface IUserService
     {
-        int Create(User data);
-        User Get(int id);
-        void Update(int id, User data);
-        void Delete(int id);
+        Task CreateAsync(User data, CancellationToken cancellationToken);
+        Task<User> GetAsync(int id, CancellationToken cancellationToken);
+        Task UpdateAsync(int id, User data, CancellationToken cancellationToken);
+        Task DeleteAsync(int id, CancellationToken cancellationToken);
     }
 }

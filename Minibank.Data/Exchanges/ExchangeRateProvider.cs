@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading;
 using Minibank.Core.Exceptions;
 using Minibank.Data.Exchanges.Models;
 using Minibank.Core.Exchanges;
@@ -16,40 +17,39 @@ namespace Minibank.Data.Exchanges
 {
     public class ExchangeRateProvider : IExchangeRateProvider
     {
-        //private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
 
-        public ExchangeRateProvider(IConfiguration configuration, HttpClient httpClient)
+        public ExchangeRateProvider(HttpClient httpClient)
         {
-            //_httpClientFactory = httpClientFactory;
-            _configuration = configuration;
             _httpClient = httpClient;
         }
 
-        public decimal RateOf(string currencyCode)
+        public async Task<decimal> GetRateAsync(string currencyCode, CancellationToken cancellationToken)
         {
-            return GetRate(currencyCode.Trim().ToUpper());
+            return await GetRateFromJsonAsync(currencyCode.Trim().ToUpper(), cancellationToken);
         }
 
-        decimal GetRate(string currencyCode)
+        private async Task<decimal> GetRateFromJsonAsync(string currencyCode, CancellationToken cancellationToken)
         {
             if (currencyCode == Currency.DefaultCurrency)
             {
                 return 1;
             }
 
-            var response = _httpClient
-                .GetFromJsonAsync<ExchangeRateResponse>("daily_json.js")
-                .GetAwaiter()
-                .GetResult();
+            var response = await _httpClient
+                .GetFromJsonAsync<ExchangeRateResponse>("daily_json.js", cancellationToken);
 
-            if (response.Valute.ContainsKey(currencyCode))
+            if (response == null)
             {
-                return response.Valute[currencyCode].Value;
+                throw new ValidationException("empty response");
             }
 
-            throw new ValidationException("Unknown currency code");
+            if (!response.Valute.ContainsKey(currencyCode))
+            {
+                throw new ValidationException("unknown currency code");
+            }
+
+            return response.Valute[currencyCode].Value;
         }
     }
 }

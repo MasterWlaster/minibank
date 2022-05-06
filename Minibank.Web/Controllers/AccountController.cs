@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Minibank.Web.Dto.Mapping;
 using Minibank.Core.Domains.Accounts.Services;
@@ -25,30 +26,34 @@ namespace Minibank.Web.Controllers
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="currencyCode"></param>
+        /// <param name="cancellationToken"></param>
         [HttpPost]
-        public int Create(int userId, string currencyCode)
+        public async Task Create(int userId, string currencyCode, CancellationToken cancellationToken)
         {
-            return _accountService.Create(userId, currencyCode);
+            await _accountService.CreateAsync(userId, currencyCode, cancellationToken);
         }
 
         /// <summary>
         /// Close
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
         [HttpDelete]
-        public void Close(int id)
+        public async Task Close(int id, CancellationToken cancellationToken)
         {
-            _accountService.Close(id);
+            await _accountService.CloseAsync(id, cancellationToken);
         }
 
         /// <summary>
         /// Change Money
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="delta"></param>
+        /// <param name="cancellationToken"></param>
         [HttpPost("change_money")]
-        public void ChangeMoney(int id, decimal delta)
+        public async Task ChangeMoney(int id, decimal delta, CancellationToken cancellationToken)
         {
-            _accountService.ChangeMoney(id, delta);
+            await _accountService.AddMoneyAsync(id, delta, cancellationToken);
         }
 
         /// <summary>
@@ -57,11 +62,12 @@ namespace Minibank.Web.Controllers
         /// <param name="money"></param>
         /// <param name="fromAccountId"></param>
         /// <param name="toAccountId"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet]
-        public decimal CalculateCommission(decimal money, int fromAccountId, int toAccountId)
+        public async Task<decimal> CalculateCommission(decimal money, int fromAccountId, int toAccountId, CancellationToken cancellationToken)
         {
-            return _accountService.CalculateCommission(money, fromAccountId, toAccountId);
+            return await _accountService.CalculateCommissionAsync(money, fromAccountId, toAccountId, cancellationToken);
         }
 
         /// <summary>
@@ -70,10 +76,11 @@ namespace Minibank.Web.Controllers
         /// <param name="money"></param>
         /// <param name="fromAccountId"></param>
         /// <param name="toAccountId"></param>
+        /// <param name="cancellationToken"></param>
         [HttpPost("do_transfer")]
-        public void DoTransfer(decimal money, int fromAccountId, int toAccountId)
+        public async Task DoTransfer(decimal money, int fromAccountId, int toAccountId, CancellationToken cancellationToken)
         {
-            _accountService.DoTransfer(money, fromAccountId, toAccountId);
+            await _accountService.DoTransferAsync(money, fromAccountId, toAccountId, cancellationToken);
         }
     }
 }

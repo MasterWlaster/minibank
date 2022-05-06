@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Minibank.Core.Exceptions;
 using Minibank.Web.Dto.Mapping;
@@ -25,30 +26,33 @@ namespace Minibank.Web.Controllers
         /// Create
         /// </summary>
         /// <param name="model"></param>
+        /// <param name="cancellationToken"></param>
         [HttpPost]
-        public int Create(UserDto model)
+        public async Task Create(UserDto model, CancellationToken cancellationToken)
         {
-            return _userService.Create(MapperUser.ToUser(model));
+            await _userService.CreateAsync(MapperUser.ToUser(model), cancellationToken);
         }
 
         /// <summary>
         /// Update
         /// </summary>
         /// <param name="model"></param>
+        /// <param name="cancellationToken"></param>
         [HttpPut]
-        public void Update(UserDto model)
+        public async Task Update(UserDto model, CancellationToken cancellationToken)
         {
-            _userService.Update(model.Id, MapperUser.ToUser(model));
+            await _userService.UpdateAsync(model.Id, MapperUser.ToUser(model), cancellationToken);
         }
 
         /// <summary>
         /// Delete
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
         [HttpDelete]
-        public void Delete(int id)
+        public async Task Delete(int id, CancellationToken cancellationToken)
         {
-            _userService.Delete(id);
+            await _userService.DeleteAsync(id, cancellationToken);
         }
     }
 }

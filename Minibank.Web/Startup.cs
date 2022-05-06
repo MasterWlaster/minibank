@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Minibank.Web.HostedServices;
 using Minibank.Web.Middlewares;
 using Minibank.Core;
 using Minibank.Data;
@@ -35,6 +36,8 @@ namespace Minibank.Web
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Minibank.Web", Version = "v1" });
             });
 
+            services.AddHostedService<MigrationHostedService>();
+
             services.AddCore();
             services.AddData(Configuration);
         }
@@ -50,7 +53,6 @@ namespace Minibank.Web
             }
 
             app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMiddleware<ValidationExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 

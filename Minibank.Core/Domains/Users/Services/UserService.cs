@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using Minibank.Core.Domains.Users.Repositories;
 using Minibank.Core.Domains.Accounts.Repositories;
-using Minibank.Core.Exceptions;
+using ValidationException = Minibank.Core.Exceptions.ValidationException;
 
 namespace Minibank.Core.Domains.Users.Services
 {
@@ -13,38 +15,65 @@ namespace Minibank.Core.Domains.Users.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IAccountRepository _accountRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IValidator<User> _userValidator;
 
-        public UserService(IUserRepository userRepository, IAccountRepository accountService)
+        public UserService(IUserRepository userRepository, IAccountRepository accountService, IUnitOfWork unitOfWork, IValidator<User> userValidator)
         {
             _userRepository = userRepository;
             _accountRepository = accountService;
+            _unitOfWork = unitOfWork;
+            _userValidator = userValidator;
         }
 
-        public int Create(User data)
+        public async Task CreateAsync(User data, CancellationToken cancellationToken)
         {
-            return _userRepository.Create(data);
+            await _userValidator.ValidateAndThrowAsync(data, cancellationToken);
+            
+            _userRepository.Create(data);
+
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        public void Delete(int id)
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            if (_accountRepository.ExistsWithUser(id))
+            if (!await _userRepository.ExistsAsync(id, cancellationToken))
+            {
+                return;
+            }
+
+            if (await _accountRepository.IsActiveWithUserAsync(id, cancellationToken))
             {
                 throw new ValidationException("user has active accounts");
             }
 
-            _userRepository.Get(id);
-
-            _userRepository.Delete(id);
+            await _userRepository.DeleteAsync(id, cancellationToken);
+            
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        public User Get(int id)
+        public async Task<User> GetAsync(int id, CancellationToken cancellationToken)
         {
-            return _userRepository.Get(id);
+            var user = await _userRepository.GetAsync(id, cancellationToken);
+
+            if (user == null)
+            {
+                throw new ValidationException("user not found");
+            }
+
+            return user;
         }
 
-        public void Update(int id, User data)
+        public async Task UpdateAsync(int id, User data, CancellationToken cancellationToken)
         {
-            _userRepository.Update(id, data);
+            if (!await _userRepository.ExistsAsync(id, cancellationToken))
+            {
+                throw new ValidationException("user not found");
+            }
+
+            await _userRepository.UpdateAsync(id, data, cancellationToken);
+            
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

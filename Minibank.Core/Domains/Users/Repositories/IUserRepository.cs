@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Minibank.Core.Domains.Users.Repositories
 {
     public interface IUserRepository
     {
-        int Create(User data);
-        User Get(int id);
-        void Update(int id, User data);
-        void Delete(int id);
+        void Create(User data);
+        Task<User> GetAsync(int id, CancellationToken cancellationToken);
+        Task UpdateAsync(int id, User data, CancellationToken cancellationToken);
+        Task DeleteAsync(int id, CancellationToken cancellationToken);
+        Task<bool> ExistsAsync(int id, CancellationToken cancellationToken);
     }
 }
