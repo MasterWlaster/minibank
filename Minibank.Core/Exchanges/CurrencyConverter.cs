@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Minibank.Core.Exceptions;
 
@@ -16,7 +17,7 @@ namespace Minibank.Core.Exchanges
             _exchangeRateProvider = exchangeRateProvider;
         }
 
-        public async Task<decimal> ConvertAsync(decimal value, string fromCurrency, string intoCurrency)
+        public async Task<decimal> ConvertAsync(decimal value, string fromCurrency, string intoCurrency, CancellationToken cancellationToken)
         {
             if (value < 0)
             {
@@ -25,8 +26,8 @@ namespace Minibank.Core.Exchanges
 
             return 
                 value * 
-                await _exchangeRateProvider.GetRateAsync(fromCurrency) /
-                await _exchangeRateProvider.GetRateAsync(intoCurrency);
+                await _exchangeRateProvider.GetRateAsync(fromCurrency, cancellationToken) /
+                await _exchangeRateProvider.GetRateAsync(intoCurrency, cancellationToken);
         }
     }
 }

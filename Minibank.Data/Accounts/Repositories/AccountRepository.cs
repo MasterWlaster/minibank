@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Minibank.Core.Domains.Accounts;
@@ -33,19 +34,19 @@ namespace Minibank.Data.Accounts.Repositories
             _context.Accounts.Add(entity);
         }
 
-        public async Task<Account> GetAsync(int id)
+        public async Task<Account> GetAsync(int id, CancellationToken cancellationToken)
         {
             var entity = await _context.Accounts
                 .AsNoTracking()
-                .FirstOrDefaultAsync(it => it.Id == id);
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
             return entity == null ? null : MapperAccountDb.ToAccount(entity);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
             var entity = await _context.Accounts
-                .FirstOrDefaultAsync(it => it.Id == id);
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
             if (entity == null)
             {
@@ -55,10 +56,10 @@ namespace Minibank.Data.Accounts.Repositories
             _context.Accounts.Remove(entity);
         }
 
-        public async Task AddMoneyAsync(int id, decimal delta)
+        public async Task AddMoneyAsync(int id, decimal delta, CancellationToken cancellationToken)
         {
             var entity = await _context.Accounts
-                .FirstOrDefaultAsync(it => it.Id == id);
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
             if (entity == null)
             {
@@ -70,10 +71,10 @@ namespace Minibank.Data.Accounts.Repositories
             _context.Accounts.Update(entity);
         }
 
-        public async Task CloseAsync(int id)
+        public async Task CloseAsync(int id, CancellationToken cancellationToken)
         {
             var entity = await _context.Accounts
-                .FirstOrDefaultAsync(it => it.Id == id);
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
             if (entity == null)
             {
@@ -86,12 +87,10 @@ namespace Minibank.Data.Accounts.Repositories
             _context.Accounts.Update(entity);
         }
 
-        public async Task<bool> ExistsWithUserAsync(int userId)
+        public async Task<bool> IsActiveWithUserAsync(int userId, CancellationToken cancellationToken)
         {
-            var entity = await _context.Accounts
-                .FirstOrDefaultAsync(it => it.UserId == userId);
-
-            return entity != null;
+            return await _context.Accounts
+                .AnyAsync(it => it.UserId == userId && it.IsActive, cancellationToken);
         }
     }
 }
