@@ -18,6 +18,7 @@ namespace Minibank.Data.Exchanges
     public class ExchangeRateProvider : IExchangeRateProvider
     {
         private readonly HttpClient _httpClient;
+        private readonly ICurrencyTool _currencyTool;
 
         public ExchangeRateProvider(HttpClient httpClient)
         {
@@ -31,7 +32,7 @@ namespace Minibank.Data.Exchanges
 
         private async Task<decimal> GetRateFromJsonAsync(string currencyCode, CancellationToken cancellationToken)
         {
-            if (currencyCode == Currency.DefaultCurrency)
+            if (currencyCode == _currencyTool.DefaultCurrency)
             {
                 return 1;
             }

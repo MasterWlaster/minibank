@@ -10,6 +10,7 @@ using Minibank.Core.Domains.Accounts.Services;
 using Minibank.Core.Domains.Transfers.Repositories;
 using Minibank.Core.Exceptions;
 using Minibank.Core.Exchanges;
+using Minibank.Core.Helpers;
 using Moq;
 using Xunit;
 
@@ -25,7 +26,8 @@ namespace Minibank.Core.Tests
                 new Mock<IAccountRepository>().Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             const int id = 540;
 
@@ -47,7 +49,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             const int fromAccountId = 234;
             const int toAccountId = 345;
@@ -74,7 +77,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             const int fromAccountId = 234;
             const int toAccountId = 345;
@@ -100,7 +104,8 @@ namespace Minibank.Core.Tests
                 new Mock<IAccountRepository>().Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             //ACT
 
@@ -120,7 +125,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             const int fromAccountId = 234;
             const int toAccountId = 345;
@@ -151,7 +157,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             const int fromAccountId = 234;
             const int toAccountId = 345;
@@ -182,7 +189,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             const int fromAccountId = 234;
             const int toAccountId = 345;
@@ -213,7 +221,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             const int fromAccountId = 234;
             const int toAccountId = 345;
@@ -246,7 +255,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             const int fromAccountId = 234;
             const int toAccountId = 345;
@@ -280,7 +290,8 @@ namespace Minibank.Core.Tests
                 new Mock<IAccountRepository>().Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object);
+                unitOfWorkMock.Object,
+                new Mock<ICurrencyTool>().Object);
 
             //ACT
             accountService.CloseAsync(1, CancellationToken.None).GetAwaiter().GetResult();
@@ -299,7 +310,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object);
+                unitOfWorkMock.Object,
+                new Mock<ICurrencyTool>().Object);
 
             accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
@@ -321,7 +333,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
@@ -344,7 +357,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object);
+                unitOfWorkMock.Object,
+                new Mock<ICurrencyTool>().Object);
 
             accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
@@ -365,7 +379,8 @@ namespace Minibank.Core.Tests
                 new Mock<IAccountRepository>().Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             //ACT
 
@@ -385,7 +400,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
@@ -409,7 +425,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                new Mock<ICurrencyTool>().Object);
 
             const decimal delta = -100;
             const decimal money = 1;
@@ -437,7 +454,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object);
+                unitOfWorkMock.Object,
+                new Mock<ICurrencyTool>().Object);
 
             accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
@@ -454,19 +472,19 @@ namespace Minibank.Core.Tests
         public void CreateAccount_WithInvalidCurrency_ShouldThrowException()
         {
             //ARRANGE
+            var currencyToolMock = new Mock<ICurrencyTool>();
             var accountService = new AccountService(
                 new Mock<IAccountRepository>().Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
-
-            const string currencyCode = "invalidCode";
+                new Mock<IUnitOfWork>().Object,
+                currencyToolMock.Object);
 
             //ACT
 
             //ASSERT
             Assert.Throws<ValidationException>(() =>
-                accountService.CreateAsync(1, currencyCode, CancellationToken.None)
+                accountService.CreateAsync(1, "", CancellationToken.None)
                     .GetAwaiter()
                     .GetResult());
         }
@@ -476,21 +494,28 @@ namespace Minibank.Core.Tests
         {
             //ARRANGE
             var accountRepositoryMock = new Mock<IAccountRepository>();
+            var currencyToolMock = new Mock<ICurrencyTool>();
             var accountService = new AccountService(
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object);
+                new Mock<IUnitOfWork>().Object,
+                currencyToolMock.Object);
+
+            const string validCurrency = "currency";
 
             accountRepositoryMock.Setup(repository => repository
                     .Create(It.IsAny<int>(), It.IsAny<string>()))
                 .Throws(new Exception());
 
+            currencyToolMock.Setup(tool => tool.Validate(It.IsAny<string>()))
+                .Returns(validCurrency);
+
             //ACT
 
             //ASSERT
             Assert.Throws<Exception>(() =>
-                accountService.CreateAsync(1, "usd", CancellationToken.None)
+                accountService.CreateAsync(1, "", CancellationToken.None)
                     .GetAwaiter()
                     .GetResult());
         }
@@ -500,14 +525,21 @@ namespace Minibank.Core.Tests
         {
             //ARRANGE
             var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var currencyToolMock = new Mock<ICurrencyTool>();
             var accountService = new AccountService(
                 new Mock<IAccountRepository>().Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object);
+                unitOfWorkMock.Object,
+                currencyToolMock.Object);
+
+            const string validCurrency = "currency";
+
+            currencyToolMock.Setup(tool => tool.Validate(It.IsAny<string>()))
+                .Returns(validCurrency);
 
             //ACT
-            accountService.CreateAsync(1, "usd", CancellationToken.None)
+            accountService.CreateAsync(1, "", CancellationToken.None)
                 .GetAwaiter()
                 .GetResult();
 
@@ -524,7 +556,8 @@ namespace Minibank.Core.Tests
                 new Mock<IAccountRepository>().Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object);
+                unitOfWorkMock.Object,
+                new Mock<ICurrencyTool>().Object);
 
             unitOfWorkMock
                 .Setup(unitOfWork => unitOfWork.BeginTransactionAsync())
@@ -555,7 +588,8 @@ namespace Minibank.Core.Tests
                 new Mock<IAccountRepository>().Object,
                 new Mock<ITransferRepository>().Object,
                 new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object);
+                unitOfWorkMock.Object,
+                new Mock<ICurrencyTool>().Object);
 
             //ACT
             try
@@ -584,7 +618,8 @@ namespace Minibank.Core.Tests
                 accountRepositoryMock.Object,
                 new Mock<ITransferRepository>().Object,
                 currencyConverterMock.Object,
-                unitOfWorkMock.Object);
+                unitOfWorkMock.Object,
+                new Mock<ICurrencyTool>().Object);
 
             const decimal fromAccountMoney = 1;
             var fromAccount = new Account() {Id = 1, Money = fromAccountMoney, IsActive = true, UserId = 1};
