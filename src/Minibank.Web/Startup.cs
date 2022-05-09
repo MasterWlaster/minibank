@@ -11,6 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Extensions;
 using Minibank.Web.HostedServices;
 using Minibank.Web.Middlewares;
 using Minibank.Core;
@@ -31,12 +34,54 @@ namespace Minibank.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Minibank.Web", Version = "v1" });
+
+                c.AddSecurityDefinition("oauth2",
+                    new OpenApiSecurityScheme()
+                    {
+                        Type = SecuritySchemeType.OAuth2,
+                        Flows = new OpenApiOAuthFlows()
+                        {
+                            ClientCredentials = new OpenApiOAuthFlow()
+                            {
+                                TokenUrl = new Uri("https://demo.duendesoftware.com/connect/token"),
+                                Scopes = new Dictionary<string, string>()
+                            }
+                        }
+                    });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme()
+                        {
+                            Reference = new OpenApiReference()
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = SecuritySchemeType.OAuth2.GetDisplayName()
+                            }
+                        },
+                        new List<string>()
+                    }
+                });
             });
 
             services.AddHostedService<MigrationHostedService>();
+
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.Audience = "api";
+                    options.Authority = "https://demo.duendesoftware.com/";
+                    options.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateAudience = false
+                    };
+                });
 
             services.AddCore();
             services.AddData(Configuration);
@@ -57,6 +102,9 @@ namespace Minibank.Web
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseMiddleware<CustomAuthenticationMiddleware>();
 
             app.UseAuthorization();
 

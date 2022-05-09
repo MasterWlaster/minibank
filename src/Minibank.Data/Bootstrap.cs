@@ -36,7 +36,7 @@ namespace Minibank.Data
             services.AddDbContext<Context>(
                 options => options
                     .UseLazyLoadingProxies()
-                    .UseNpgsql(configuration["DbConnectionString"]));
+                    .UseNpgsql(configuration["Database:ConnectionString"]));
             
             return services;
         }
