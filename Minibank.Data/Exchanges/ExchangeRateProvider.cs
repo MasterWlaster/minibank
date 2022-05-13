@@ -20,9 +20,10 @@ namespace Minibank.Data.Exchanges
         private readonly HttpClient _httpClient;
         private readonly ICurrencyTool _currencyTool;
 
-        public ExchangeRateProvider(HttpClient httpClient)
+        public ExchangeRateProvider(HttpClient httpClient, ICurrencyTool currencyTool)
         {
             _httpClient = httpClient;
+            _currencyTool = currencyTool;
         }
 
         public async Task<decimal> GetRateAsync(string currencyCode, CancellationToken cancellationToken)
