@@ -36,7 +36,19 @@ namespace Minibank.Core.Tests
                 _unitOfWorkMock.Object,
                 _validator);
         }
-        
+
+        [Fact]
+        public async Task CreateUser_WithNullData_ShouldThrowException()
+        {
+            //ARRANGE
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                _userService.CreateAsync(null, CancellationToken.None));
+        }
+
         [Fact]
         public async Task CreateUser_WithNullLogin_ShouldThrowException()
         {
@@ -77,15 +89,45 @@ namespace Minibank.Core.Tests
         }
 
         [Fact]
-        public async Task CreateUser_WithNullData_ShouldThrowException()
+        public async Task CreateUser_WithInvalidData_ShouldNotCallCreate()
         {
             //ARRANGE
+            var data = new User();
 
             //ACT
+            try
+            {
+                await _userService.CreateAsync(data, CancellationToken.None);
+            }
+            catch
+            {
+                //
+            }
 
             //ASSERT
-            await Assert.ThrowsAsync<ValidationException>(() =>
-                _userService.CreateAsync(null, CancellationToken.None));
+            _userRepositoryMock.Verify(repository => repository.Create(data), Times.Never);
+        }
+
+        [Fact]
+        public async Task CreateUser_ErrorWithCreation_ShouldNotCallSaveChanges()
+        {
+            //ARRANGE
+            var data = new User() {Email = "1", Login = "1"};
+
+            _userRepositoryMock.Setup(repository => repository.Create(data)).Throws<Exception>();
+
+            //ACT
+            try
+            {
+                await _userService.CreateAsync(data, CancellationToken.None);
+            }
+            catch
+            {
+                //
+            }
+
+            //ASSERT
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
@@ -133,34 +175,6 @@ namespace Minibank.Core.Tests
         }
 
         [Fact]
-        public async Task DeleteUser_HasActiveAccountsOrNotExists_ShouldCallExistsAsync()
-        {
-            //ARRANGE
-
-            //ACT
-            await _userService.DeleteAsync(1, CancellationToken.None);
-
-            //ASSERT
-            _userRepositoryMock
-                .Verify(repository => repository.ExistsAsync(1, CancellationToken.None), Times.Once);
-        }
-
-        [Fact]
-        public async Task DeleteUser_UserNotExists_ShouldNotCallSaveChangesAsync()
-        {
-            //ARRANGE
-            _userRepositoryMock.Setup(repository => repository
-                .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(false));
-
-            //ACT
-            await _userService.DeleteAsync(1, CancellationToken.None);
-
-            //ASSERT
-            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
-        }
-
-        [Fact]
         public async Task DeleteUser_WithActiveAccounts_ShouldThrowException()
         {
             //ARRANGE
@@ -173,6 +187,81 @@ namespace Minibank.Core.Tests
             //ASSERT
             await Assert.ThrowsAsync<ValidationException>(() =>
                 _userService.DeleteAsync(1, CancellationToken.None));
+        }
+
+        [Fact]
+        public async Task DeleteUser_WithActiveAccounts_ShouldNotCallDeleteAsync()
+        {
+            //ARRANGE
+            _accountRepositoryMock.Setup(repository => repository
+                    .IsActiveWithUserAsync(It.IsAny<int>(), CancellationToken.None))
+                .Returns(Task.FromResult(true));
+
+            //ACT
+            try
+            {
+                await _userService.DeleteAsync(1, CancellationToken.None);
+            }
+            catch
+            {
+                //
+            }
+
+            //ASSERT
+            _userRepositoryMock
+                .Verify(repository => repository.DeleteAsync(1, CancellationToken.None), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteUser_NotActiveAccountsOrNotExists_ShouldCallExistsAsync()
+        {
+            //ARRANGE
+
+            //ACT
+            await _userService.DeleteAsync(1, CancellationToken.None);
+
+            //ASSERT
+            _userRepositoryMock
+                .Verify(repository => repository.ExistsAsync(1, CancellationToken.None), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteUser_UserNotExists_ShouldNotCallDeleteAsync()
+        {
+            //ARRANGE
+
+            //ACT
+            await _userService.DeleteAsync(1, CancellationToken.None);
+
+            //ASSERT
+            _userRepositoryMock
+                .Verify(repository => repository.DeleteAsync(1, CancellationToken.None), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteUser_ErrorWithDeleting_ShouldNotCallSaveChangesAsync()
+        {
+            //ARRANGE
+            _userRepositoryMock.Setup(repository => repository
+                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
+                .Returns(Task.FromResult(true));
+
+            _userRepositoryMock.Setup(repository => repository
+                    .DeleteAsync(It.IsAny<int>(), CancellationToken.None))
+                .Throws<Exception>();
+
+            //ACT
+            try
+            {
+                await _userService.DeleteAsync(1, CancellationToken.None);
+            }
+            catch
+            {
+                //
+            }
+
+            //ASSERT
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
@@ -194,15 +283,59 @@ namespace Minibank.Core.Tests
         public async Task UpdateUser_UserNotExists_ShouldThrowException()
         {
             //ARRANGE
-            _userRepositoryMock.Setup(repository => repository
-                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(false));
 
             //ACT
 
             //ASSERT
             await Assert.ThrowsAsync<ValidationException>(() =>
                 _userService.UpdateAsync(1, new User(), CancellationToken.None));
+        }
+
+        [Fact]
+        public async Task UpdateUser_UserNotExists_ShouldNotCallUpdateAsync()
+        {
+            //ARRANGE
+            var user = new User();
+
+            //ACT
+            try
+            {
+                await _userService.UpdateAsync(1, user, CancellationToken.None);
+            }
+            catch
+            {
+                //
+            }
+
+            //ASSERT
+            _userRepositoryMock.Verify(repository => repository
+                .UpdateAsync(1, user, CancellationToken.None), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateUser_ErrorWithUpdating_ShouldCallSaveChangesOnce()
+        {
+            //ARRANGE
+            _userRepositoryMock.Setup(repository => repository
+                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
+                .Returns(Task.FromResult(true));
+
+            _userRepositoryMock.Setup(repository => repository
+                    .UpdateAsync(It.IsAny<int>(), It.IsAny<User>(), CancellationToken.None))
+                .Throws<Exception>();
+
+            //ACT
+            try
+            {
+                await _userService.UpdateAsync(1, null, CancellationToken.None);
+            }
+            catch
+            {
+                //
+            }
+
+            //ASSERT
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
