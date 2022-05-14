@@ -47,7 +47,7 @@ namespace Minibank.Web
                         {
                             ClientCredentials = new OpenApiOAuthFlow()
                             {
-                                TokenUrl = new Uri("https://demo.duendesoftware.com/connect/token"),
+                                TokenUrl = new Uri(Configuration["Auth:TokenUrl"]),
                                 Scopes = new Dictionary<string, string>()
                             }
                         }
@@ -76,7 +76,7 @@ namespace Minibank.Web
                 .AddJwtBearer(options =>
                 {
                     options.Audience = "api";
-                    options.Authority = "https://demo.duendesoftware.com/";
+                    options.Authority = Configuration["Auth:Authority"];
                     options.TokenValidationParameters = new TokenValidationParameters()
                     {
                         ValidateAudience = false
@@ -103,8 +103,8 @@ namespace Minibank.Web
 
             app.UseRouting();
 
-            app.UseAuthentication();
             app.UseMiddleware<CustomAuthenticationMiddleware>();
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
