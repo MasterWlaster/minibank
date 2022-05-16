@@ -67,7 +67,7 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account()));
+                .ReturnsAsync(new Account());
 
             //ACT
 
@@ -85,7 +85,7 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account()));
+                .ReturnsAsync(new Account());
 
             //ACT
 
@@ -115,11 +115,11 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = false }));
+                .ReturnsAsync(new Account() { IsActive = false });
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true }));
+                .ReturnsAsync(new Account() { IsActive = true });
 
             //ACT
 
@@ -137,11 +137,11 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true }));
+                .ReturnsAsync(new Account() { IsActive = true });
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = false }));
+                .ReturnsAsync(new Account() { IsActive = false });
 
             //ACT
 
@@ -159,11 +159,11 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = false }));
+                .ReturnsAsync(new Account() { IsActive = false });
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = false }));
+                .ReturnsAsync(new Account() { IsActive = false });
 
             //ACT
 
@@ -182,11 +182,11 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, UserId = userId }));
+                .ReturnsAsync(new Account() { IsActive = true, UserId = userId });
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, UserId = userId }));
+                .ReturnsAsync(new Account() { IsActive = true, UserId = userId });
 
             //ACT
             var commission = await _accountService
@@ -207,11 +207,11 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, UserId = fromUserId }));
+                .ReturnsAsync(new Account() { IsActive = true, UserId = fromUserId });
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, UserId = toUserId }));
+                .ReturnsAsync(new Account() { IsActive = true, UserId = toUserId });
 
             //ACT
             var commission = await _accountService
@@ -240,7 +240,7 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() {IsActive = false}));
+                .ReturnsAsync(new Account() {IsActive = false});
 
             //ACT
             await _accountService.CloseAsync(1, CancellationToken.None);
@@ -256,7 +256,7 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, Money = 1 }));
+                .ReturnsAsync(new Account() { IsActive = true, Money = 1 });
 
             //ACT
 
@@ -271,19 +271,14 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, Money = 1 }));
+                .ReturnsAsync(new Account() { IsActive = true, Money = 1 });
 
             //ACT
-            try
-            {
-                await _accountService.CloseAsync(1, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CloseAsync(1, CancellationToken.None));
+
             _accountRepositoryMock.Verify(repository => repository
                 .CloseAsync(1, CancellationToken.None), Times.Never);
         }
@@ -294,23 +289,18 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, Money = 0 }));
+                .ReturnsAsync(new Account() { IsActive = true, Money = 0 });
 
             _accountRepositoryMock.Setup(repository => repository
                     .CloseAsync(It.IsAny<int>(), CancellationToken.None))
                 .Throws<Exception>();
 
             //ACT
-            try
-            {
-                await _accountService.CloseAsync(1, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<Exception>(() => _accountService
+                .CloseAsync(1, CancellationToken.None));
+
             _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
@@ -320,7 +310,7 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() {IsActive = true, Money = 0}));
+                .ReturnsAsync(new Account() {IsActive = true, Money = 0});
 
             //ACT
             await _accountService.CloseAsync(1, CancellationToken.None);
@@ -346,16 +336,11 @@ namespace Minibank.Core.Tests
             //ARRANGE
 
             //ACT
-            try
-            {
-                await _accountService.AddMoneyAsync(1, 1, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .AddMoneyAsync(1, 1, CancellationToken.None));
+
             _accountRepositoryMock.Verify(repository => repository
                 .AddMoneyAsync(1, 1, CancellationToken.None), Times.Never);
         }
@@ -366,7 +351,7 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = false }));
+                .ReturnsAsync(new Account() { IsActive = false });
 
             //ACT
 
@@ -381,19 +366,14 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = false }));
+                .ReturnsAsync(new Account() { IsActive = false });
 
             //ACT
-            try
-            {
-                await _accountService.AddMoneyAsync(1, 1, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .AddMoneyAsync(1, 1, CancellationToken.None));
+
             _accountRepositoryMock.Verify(repository => repository
                 .AddMoneyAsync(1, 1, CancellationToken.None), Times.Never);
         }
@@ -407,7 +387,7 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, Money = money }));
+                .ReturnsAsync(new Account() { IsActive = true, Money = money });
 
             //ACT
 
@@ -425,19 +405,14 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, Money = money }));
+                .ReturnsAsync(new Account() { IsActive = true, Money = money });
 
             //ACT
-            try
-            {
-                await _accountService.AddMoneyAsync(1, delta, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .AddMoneyAsync(1, delta, CancellationToken.None));
+
             _accountRepositoryMock.Verify(repository => repository
                 .AddMoneyAsync(1, delta, CancellationToken.None), Times.Never);
         }
@@ -448,23 +423,19 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, Money = 10 }));
+                .ReturnsAsync(new Account() { IsActive = true, Money = 10 });
 
             _accountRepositoryMock.Setup(repository => repository
                     .AddMoneyAsync(It.IsAny<int>(), It.IsAny<decimal>(), CancellationToken.None))
                 .Throws<Exception>();
 
             //ACT
-            try
-            {
-                await _accountService.AddMoneyAsync(1, 1, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+
+            await Assert.ThrowsAsync<Exception>(() => _accountService
+                .AddMoneyAsync(1, 1, CancellationToken.None));
+
             _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
@@ -474,7 +445,7 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, Money = 10 }));
+                .ReturnsAsync(new Account() { IsActive = true, Money = 10 });
 
             //ACT
             await _accountService.AddMoneyAsync(1, 1, CancellationToken.None);
@@ -501,16 +472,11 @@ namespace Minibank.Core.Tests
             //ARRANGE
 
             //ACT
-            try
-            {
-                await _accountService.CreateAsync(1, "1", CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CreateAsync(1, "1", CancellationToken.None));
+
             _accountRepositoryMock.Verify(repository => repository
                 .Create(1, It.IsAny<string>()), Times.Never);
         }
@@ -541,16 +507,11 @@ namespace Minibank.Core.Tests
                 .Returns(validCurrency);
 
             //ACT
-            try
-            {
-                await _accountService.CreateAsync(1, "", CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CreateAsync(1, "", CancellationToken.None));
+
             _accountRepositoryMock.Verify(repository => repository
                 .Create(1, It.IsAny<string>()), Times.Never);
         }
@@ -566,23 +527,18 @@ namespace Minibank.Core.Tests
 
             _userRepositoryMock.Setup(repository => repository
                     .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync(true);
 
             _accountRepositoryMock.Setup(repository => repository
                     .Create(It.IsAny<int>(), It.IsAny<string>()))
                 .Throws<Exception>();
 
             //ACT
-            try
-            {
-                await _accountService.CreateAsync(1, "", CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<Exception>(() => _accountService
+                .CreateAsync(1, "", CancellationToken.None));
+
             _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
@@ -597,7 +553,7 @@ namespace Minibank.Core.Tests
 
             _userRepositoryMock.Setup(repository => repository
                     .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync(true);
 
             //ACT
             await _accountService.CreateAsync(1, "", CancellationToken.None);
@@ -615,17 +571,11 @@ namespace Minibank.Core.Tests
                 .Throws<Exception>();
 
             //ACT
-            try
-            {
-                await _accountService
-                    .DoTransferAsync(1, 1, 2, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<Exception>(() => _accountService
+                .DoTransferAsync(1, 1, 2, CancellationToken.None));
+
             _unitOfWorkMock.Verify(unitOfWork => unitOfWork.DisposeTransactionAsync(), Times.Never);
         }
 
@@ -635,17 +585,11 @@ namespace Minibank.Core.Tests
             //ARRANGE
 
             //ACT
-            try
-            {
-                await _accountService
-                    .DoTransferAsync(1, 1, 2, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .DoTransferAsync(1, 1, 2, CancellationToken.None));
+
             _unitOfWorkMock.Verify(unitOfWork => unitOfWork.DisposeTransactionAsync(), Times.Once);
         }
 
@@ -659,11 +603,11 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccount.Id, CancellationToken.None))
-                .Returns(Task.FromResult(fromAccount));
+                .ReturnsAsync(fromAccount);
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccount.Id, CancellationToken.None))
-                .Returns(Task.FromResult(toAccount));
+                .ReturnsAsync(toAccount);
 
             _currencyConverterMock.Setup(converter => converter
                     .ConvertAsync(
@@ -671,21 +615,14 @@ namespace Minibank.Core.Tests
                         It.IsAny<string>(), 
                         It.IsAny<string>(), 
                         CancellationToken.None))
-                .Returns(Task.FromResult(fromAccountMoney));
+                .ReturnsAsync(fromAccountMoney);
 
             //ACT
-            try
-            {
-                await _accountService.DoTransferAsync(
+            await _accountService.DoTransferAsync(
                     fromAccountMoney, 
                     fromAccount.Id, 
                     toAccount.Id, 
                     CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
             _unitOfWorkMock.Verify(unitOfWork => unitOfWork.DisposeTransactionAsync(), Times.Once);
@@ -701,11 +638,11 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccount.Id, CancellationToken.None))
-                .Returns(Task.FromResult(fromAccount));
+                .ReturnsAsync(fromAccount);
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccount.Id, CancellationToken.None))
-                .Returns(Task.FromResult(toAccount));
+                .ReturnsAsync(toAccount);
 
             _currencyConverterMock.Setup(converter => converter
                     .ConvertAsync(
@@ -713,21 +650,14 @@ namespace Minibank.Core.Tests
                         It.IsAny<string>(),
                         It.IsAny<string>(),
                         CancellationToken.None))
-                .Returns(Task.FromResult(fromAccountMoney));
+                .ReturnsAsync(fromAccountMoney);
 
             //ACT
-            try
-            {
-                await _accountService.DoTransferAsync(
+            await _accountService.DoTransferAsync(
                     fromAccountMoney,
                     fromAccount.Id,
                     toAccount.Id,
                     CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
             _accountRepositoryMock.Verify(repository => repository
@@ -745,11 +675,11 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccount.Id, CancellationToken.None))
-                .Returns(Task.FromResult(fromAccount));
+                .ReturnsAsync(fromAccount);
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccount.Id, CancellationToken.None))
-                .Returns(Task.FromResult(toAccount));
+                .ReturnsAsync(toAccount);
 
             _currencyConverterMock.Setup(converter => converter
                     .ConvertAsync(
@@ -757,21 +687,14 @@ namespace Minibank.Core.Tests
                         It.IsAny<string>(),
                         It.IsAny<string>(),
                         CancellationToken.None))
-                .Returns(Task.FromResult(fromAccountMoney));
+                .ReturnsAsync(fromAccountMoney);
 
             //ACT
-            try
-            {
-                await _accountService.DoTransferAsync(
+            await _accountService.DoTransferAsync(
                     fromAccountMoney,
                     fromAccount.Id,
                     toAccount.Id,
                     CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
             _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Exactly(3));
@@ -787,11 +710,11 @@ namespace Minibank.Core.Tests
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccount.Id, CancellationToken.None))
-                .Returns(Task.FromResult(fromAccount));
+                .ReturnsAsync(fromAccount);
 
             _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccount.Id, CancellationToken.None))
-                .Returns(Task.FromResult(toAccount));
+                .ReturnsAsync(toAccount);
 
             _currencyConverterMock.Setup(converter => converter
                     .ConvertAsync(
@@ -799,21 +722,14 @@ namespace Minibank.Core.Tests
                         It.IsAny<string>(),
                         It.IsAny<string>(),
                         CancellationToken.None))
-                .Returns(Task.FromResult(fromAccountMoney));
+                .ReturnsAsync(fromAccountMoney);
 
             //ACT
-            try
-            {
-                await _accountService.DoTransferAsync(
+            await _accountService.DoTransferAsync(
                     fromAccountMoney,
                     fromAccount.Id,
                     toAccount.Id,
                     CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
             _unitOfWorkMock.Verify(unitOfWork => unitOfWork.CommitTransactionAsync(), Times.Once);

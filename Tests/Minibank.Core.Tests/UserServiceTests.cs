@@ -95,16 +95,11 @@ namespace Minibank.Core.Tests
             var data = new User();
 
             //ACT
-            try
-            {
-                await _userService.CreateAsync(data, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _userService
+                .CreateAsync(data, CancellationToken.None));
+
             _userRepositoryMock.Verify(repository => repository.Create(data), Times.Never);
         }
 
@@ -117,16 +112,11 @@ namespace Minibank.Core.Tests
             _userRepositoryMock.Setup(repository => repository.Create(data)).Throws<Exception>();
 
             //ACT
-            try
-            {
-                await _userService.CreateAsync(data, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<Exception>(() => _userService
+                .CreateAsync(data, CancellationToken.None));
+
             _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
@@ -153,7 +143,7 @@ namespace Minibank.Core.Tests
             _userRepositoryMock
                 .Setup(repository => repository
                     .GetAsync(validId, CancellationToken.None))
-                .Returns(Task.FromResult(validUser));
+                .ReturnsAsync(validUser);
 
             //ACT
             var user = await _userService.GetAsync(validId, CancellationToken.None);
@@ -180,7 +170,7 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _accountRepositoryMock.Setup(repository => repository
                     .IsActiveWithUserAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync(true);
 
             //ACT
 
@@ -195,19 +185,14 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _accountRepositoryMock.Setup(repository => repository
                     .IsActiveWithUserAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync(true);
 
             //ACT
-            try
-            {
-                await _userService.DeleteAsync(1, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _userService
+                .DeleteAsync(1, CancellationToken.None));
+
             _userRepositoryMock
                 .Verify(repository => repository.DeleteAsync(1, CancellationToken.None), Times.Never);
         }
@@ -244,23 +229,18 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _userRepositoryMock.Setup(repository => repository
                     .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync(true);
 
             _userRepositoryMock.Setup(repository => repository
                     .DeleteAsync(It.IsAny<int>(), CancellationToken.None))
                 .Throws<Exception>();
 
             //ACT
-            try
-            {
-                await _userService.DeleteAsync(1, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<Exception>(() => _userService
+                .DeleteAsync(1, CancellationToken.None));
+
             _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
@@ -270,7 +250,7 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _userRepositoryMock.Setup(repository => repository
                     .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync(true);
 
             //ACT
             await _userService.DeleteAsync(1, CancellationToken.None);
@@ -298,16 +278,11 @@ namespace Minibank.Core.Tests
             var user = new User();
 
             //ACT
-            try
-            {
-                await _userService.UpdateAsync(1, user, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _userService
+                .UpdateAsync(1, user, CancellationToken.None));
+
             _userRepositoryMock.Verify(repository => repository
                 .UpdateAsync(1, user, CancellationToken.None), Times.Never);
         }
@@ -318,23 +293,18 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _userRepositoryMock.Setup(repository => repository
                     .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync(true);
 
             _userRepositoryMock.Setup(repository => repository
                     .UpdateAsync(It.IsAny<int>(), It.IsAny<User>(), CancellationToken.None))
                 .Throws<Exception>();
 
             //ACT
-            try
-            {
-                await _userService.UpdateAsync(1, null, CancellationToken.None);
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
+            await Assert.ThrowsAsync<Exception>(() => _userService
+                .UpdateAsync(1, null, CancellationToken.None));
+
             _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
@@ -344,7 +314,7 @@ namespace Minibank.Core.Tests
             //ARRANGE
             _userRepositoryMock.Setup(repository => repository
                     .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync(true);
 
             //ACT
             await _userService.UpdateAsync(1, null, CancellationToken.None);
