@@ -21,10 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-<<<<<<<< HEAD:src/Tests/Minibank.Core.Tests/Minibank.Core.Tests.csproj
-========
     <ProjectReference Include="..\..\Minibank.Core\Minibank.Core.csproj" />
->>>>>>>> homework_5:Tests/Minibank.Core.Tests/Minibank.Core.Tests.csproj
     <ProjectReference Include="..\..\Minibank.Data\Minibank.Data.csproj" />
   </ItemGroup>
 

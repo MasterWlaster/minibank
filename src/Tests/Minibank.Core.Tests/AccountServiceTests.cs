@@ -8,6 +8,7 @@ using Minibank.Core.Domains.Accounts;
 using Minibank.Core.Domains.Accounts.Repositories;
 using Minibank.Core.Domains.Accounts.Services;
 using Minibank.Core.Domains.Transfers.Repositories;
+using Minibank.Core.Domains.Users.Repositories;
 using Minibank.Core.Exceptions;
 using Minibank.Core.Exchanges;
 using Minibank.Core.Helpers;
@@ -18,647 +19,720 @@ namespace Minibank.Core.Tests
 {
     public class AccountServiceTests
     {
+        private readonly Mock<IAccountRepository> _accountRepositoryMock;
+        private readonly Mock<ITransferRepository> _transferRepositoryMock;
+        private readonly Mock<ICurrencyConverter> _currencyConverterMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+        private readonly Mock<ICurrencyTool> _currencyToolMock;
+        private readonly Mock<IUserRepository> _userRepositoryMock;
+        private readonly IAccountService _accountService;
+
+        public AccountServiceTests()
+        {
+            _accountRepositoryMock = new Mock<IAccountRepository>();
+            _transferRepositoryMock = new Mock<ITransferRepository>();
+            _currencyConverterMock = new Mock<ICurrencyConverter>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
+            _currencyToolMock = new Mock<ICurrencyTool>();
+            _userRepositoryMock = new Mock<IUserRepository>();
+
+            _accountService = new AccountService(
+                _accountRepositoryMock.Object,
+                _transferRepositoryMock.Object,
+                _currencyConverterMock.Object,
+                _unitOfWorkMock.Object,
+                _currencyToolMock.Object,
+                _userRepositoryMock.Object);
+        }
+
         [Fact]
-        public void CalculateCommission_EqualAccounts_ShouldThrowException()
+        public async Task CalculateCommission_EqualAccounts_ShouldThrowException()
         {
             //ARRANGE
-            var accountService = new AccountService(
-                new Mock<IAccountRepository>().Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
-
             const int id = 540;
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() => accountService
-                .CalculateCommissionAsync(1, id, id, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CalculateCommissionAsync(1, id, id, CancellationToken.None));
         }
 
         [Fact]
-        public void CalculateCommission_FromAccountNotExists_ShouldThrowException()
+        public async Task CalculateCommission_FromAccountNotExists_ShouldThrowException()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
-
             const int fromAccountId = 234;
             const int toAccountId = 345;
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account()));
+                .ReturnsAsync(new Account());
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() => accountService
-                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None));
         }
 
         [Fact]
-        public void CalculateCommission_ToAccountNotExists_ShouldThrowException()
+        public async Task CalculateCommission_ToAccountNotExists_ShouldThrowException()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
-
             const int fromAccountId = 234;
             const int toAccountId = 345;
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account()));
+                .ReturnsAsync(new Account());
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() => accountService
-                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None));
         }
 
         [Fact]
-        public void CalculateCommission_AccountsNotExists_ShouldThrowException()
+        public async Task CalculateCommission_AccountsNotExist_ShouldThrowException()
         {
             //ARRANGE
-            var accountService = new AccountService(
-                new Mock<IAccountRepository>().Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() => accountService
-                .CalculateCommissionAsync(1, 1, 2, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CalculateCommissionAsync(1, 1, 2, CancellationToken.None));
         }
 
         [Fact]
-        public void CalculateCommission_FromAccountNotActive_ShouldThrowException()
+        public async Task CalculateCommission_FromAccountNotActive_ShouldThrowException()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
-
             const int fromAccountId = 234;
             const int toAccountId = 345;
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = false }));
+                .ReturnsAsync(new Account() { IsActive = false });
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true }));
+                .ReturnsAsync(new Account() { IsActive = true });
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() => accountService
-                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None));
         }
 
         [Fact]
-        public void CalculateCommission_ToAccountNotActive_ShouldThrowException()
+        public async Task CalculateCommission_ToAccountNotActive_ShouldThrowException()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
-
             const int fromAccountId = 234;
             const int toAccountId = 345;
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true }));
+                .ReturnsAsync(new Account() { IsActive = true });
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = false }));
+                .ReturnsAsync(new Account() { IsActive = false });
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() => accountService
-                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None));
         }
 
         [Fact]
-        public void CalculateCommission_AccountsNotActive_ShouldThrowException()
+        public async Task CalculateCommission_AccountsNotActive_ShouldThrowException()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
-
             const int fromAccountId = 234;
             const int toAccountId = 345;
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = false }));
+                .ReturnsAsync(new Account() { IsActive = false });
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = false }));
+                .ReturnsAsync(new Account() { IsActive = false });
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() => accountService
-                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None));
         }
 
         [Fact]
-        public void CalculateCommission_EqualUserIds_ShouldReturnZero()
+        public async Task CalculateCommission_EqualUserIds_ShouldReturnZero()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
-
             const int fromAccountId = 234;
             const int toAccountId = 345;
             const int userId = 111;
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, UserId = userId }));
+                .ReturnsAsync(new Account() { IsActive = true, UserId = userId });
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, UserId = userId }));
+                .ReturnsAsync(new Account() { IsActive = true, UserId = userId });
 
             //ACT
-            var commission = accountService
-                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult();
+            var commission = await _accountService
+                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None);
 
             //ASSERT
             Assert.Equal(0, commission);
         }
 
         [Fact]
-        public void CalculateCommission_NotEqualUserIds_ShouldReturnNotZero()
+        public async Task CalculateCommission_NotEqualUserIds_ShouldReturnNotZero()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
-
             const int fromAccountId = 234;
             const int toAccountId = 345;
             const int fromUserId = 111;
             const int toUserId = 222;
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, UserId = fromUserId }));
+                .ReturnsAsync(new Account() { IsActive = true, UserId = fromUserId });
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccountId, CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, UserId = toUserId }));
+                .ReturnsAsync(new Account() { IsActive = true, UserId = toUserId });
 
             //ACT
-            var commission = accountService
-                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult();
+            var commission = await _accountService
+                .CalculateCommissionAsync(1, fromAccountId, toAccountId, CancellationToken.None);
 
             //ASSERT
             Assert.True(commission != 0);
         }
 
         [Fact]
-        public void CloseAccount_AccountNotExists_ShouldNotCallSaveChanges()
+        public async Task CloseAccount_AccountNotExists_ShouldNotCallCloseAsync()
         {
             //ARRANGE
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var accountService = new AccountService(
-                new Mock<IAccountRepository>().Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object,
-                new Mock<ICurrencyTool>().Object);
 
             //ACT
-            accountService.CloseAsync(1, CancellationToken.None).GetAwaiter().GetResult();
+            await _accountService.CloseAsync(1, CancellationToken.None);
 
             //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
+            _accountRepositoryMock.Verify(repository => repository
+                .CloseAsync(1, CancellationToken.None), Times.Never);
         }
 
         [Fact]
-        public void CloseAccount_AccountNotActive_ShouldNotCallSaveChanges()
+        public async Task CloseAccount_AccountNotActive_ShouldNotCallCloseAsync()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object,
-                new Mock<ICurrencyTool>().Object);
-
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() {IsActive = false}));
+                .ReturnsAsync(new Account() {IsActive = false});
 
             //ACT
-            accountService.CloseAsync(1, CancellationToken.None).GetAwaiter().GetResult();
+            await _accountService.CloseAsync(1, CancellationToken.None);
 
             //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
+            _accountRepositoryMock.Verify(repository => repository
+                .CloseAsync(1, CancellationToken.None), Times.Never);
         }
 
         [Fact]
-        public void CloseAccount_WithNotZeroBalance_ShouldThrowException()
+        public async Task CloseAccount_WithNotZeroBalance_ShouldThrowException()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
-
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, Money = 1 }));
+                .ReturnsAsync(new Account() { IsActive = true, Money = 1 });
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() =>
-                accountService.CloseAsync(1, CancellationToken.None).GetAwaiter().GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                _accountService.CloseAsync(1, CancellationToken.None));
         }
 
         [Fact]
-        public void CloseAccount_WithValidAccount_ShouldCallSaveChangesOnce()
+        public async Task CloseAccount_WithNotZeroBalance_ShouldNotCallCloseAsync()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object,
-                new Mock<ICurrencyTool>().Object);
-
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() {IsActive = true, Money = 0}));
-
-            //ACT
-            accountService.CloseAsync(1, CancellationToken.None).GetAwaiter().GetResult();
-
-            //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
-        }
-
-        [Fact]
-        public void AddMoney_AccountNotExists_ShouldThrowException()
-        {
-            //ARRANGE
-            var accountService = new AccountService(
-                new Mock<IAccountRepository>().Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
+                .ReturnsAsync(new Account() { IsActive = true, Money = 1 });
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() => accountService
-                .AddMoneyAsync(1, 1, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CloseAsync(1, CancellationToken.None));
+
+            _accountRepositoryMock.Verify(repository => repository
+                .CloseAsync(1, CancellationToken.None), Times.Never);
         }
 
         [Fact]
-        public void AddMoney_AccountNotActive_ShouldThrowException()
+        public async Task CloseAccount_ErrorWithClosing_ShouldNotCallSaveChangesAsync()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
-
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = false }));
+                .ReturnsAsync(new Account() { IsActive = true, Money = 0 });
+
+            _accountRepositoryMock.Setup(repository => repository
+                    .CloseAsync(It.IsAny<int>(), CancellationToken.None))
+                .Throws<Exception>();
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() => accountService
-                .AddMoneyAsync(1, 1, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult());
+            await Assert.ThrowsAsync<Exception>(() => _accountService
+                .CloseAsync(1, CancellationToken.None));
+
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
-        public void AddMoney_WithTooLowDelta_ShouldThrowException()
+        public async Task CloseAccount_WithValidAccount_ShouldCallSaveChangesOnce()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<ICurrencyTool>().Object);
+            _accountRepositoryMock.Setup(repository => repository
+                    .GetAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(new Account() {IsActive = true, Money = 0});
 
+            //ACT
+            await _accountService.CloseAsync(1, CancellationToken.None);
+
+            //ASSERT
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task AddMoney_AccountNotExists_ShouldThrowException()
+        {
+            //ARRANGE
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .AddMoneyAsync(1, 1, CancellationToken.None));
+        }
+
+        [Fact] public async Task AddMoney_AccountNotExists_ShouldNotCallAddMoneyAsync()
+        {
+            //ARRANGE
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .AddMoneyAsync(1, 1, CancellationToken.None));
+
+            _accountRepositoryMock.Verify(repository => repository
+                .AddMoneyAsync(1, 1, CancellationToken.None), Times.Never);
+        }
+
+        [Fact]
+        public async Task AddMoney_AccountNotActive_ShouldThrowException()
+        {
+            //ARRANGE
+            _accountRepositoryMock.Setup(repository => repository
+                    .GetAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(new Account() { IsActive = false });
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .AddMoneyAsync(1, 1, CancellationToken.None));
+        }
+
+        [Fact]
+        public async Task AddMoney_AccountNotActive_ShouldNotCallAddMoneyAsync()
+        {
+            //ARRANGE
+            _accountRepositoryMock.Setup(repository => repository
+                    .GetAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(new Account() { IsActive = false });
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .AddMoneyAsync(1, 1, CancellationToken.None));
+
+            _accountRepositoryMock.Verify(repository => repository
+                .AddMoneyAsync(1, 1, CancellationToken.None), Times.Never);
+        }
+
+        [Fact]
+        public async Task AddMoney_WithTooLowDelta_ShouldThrowException()
+        {
+            //ARRANGE
             const decimal delta = -100;
             const decimal money = 1;
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, Money = money }));
+                .ReturnsAsync(new Account() { IsActive = true, Money = money });
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() => accountService
-                .AddMoneyAsync(1, delta, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .AddMoneyAsync(1, delta, CancellationToken.None));
         }
 
         [Fact]
-        public void AddMoney_WithValidAccount_ShouldCallSaveChangesOnce()
+        public async Task AddMoney_WithTooLowDelta_ShouldNotCallAddMoneyAsync()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object,
-                new Mock<ICurrencyTool>().Object);
+            const decimal delta = -100;
+            const decimal money = 1;
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Account() { IsActive = true, Money = 10 }));
-
-            //ACT
-            accountService.AddMoneyAsync(1, 1, CancellationToken.None).GetAwaiter().GetResult();
-
-            //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
-        }
-
-        [Fact]
-        public void CreateAccount_WithInvalidCurrency_ShouldThrowException()
-        {
-            //ARRANGE
-            var currencyToolMock = new Mock<ICurrencyTool>();
-            var accountService = new AccountService(
-                new Mock<IAccountRepository>().Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                currencyToolMock.Object);
+                .ReturnsAsync(new Account() { IsActive = true, Money = money });
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() =>
-                accountService.CreateAsync(1, "", CancellationToken.None)
-                    .GetAwaiter()
-                    .GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .AddMoneyAsync(1, delta, CancellationToken.None));
+
+            _accountRepositoryMock.Verify(repository => repository
+                .AddMoneyAsync(1, delta, CancellationToken.None), Times.Never);
         }
 
         [Fact]
-        public void CreateAccount_WithInvalidUserId_ShouldThrowException()
+        public async Task AddMoney_ErrorWithAdding_ShouldNotCallSaveChanges()
         {
             //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var currencyToolMock = new Mock<ICurrencyTool>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                new Mock<IUnitOfWork>().Object,
-                currencyToolMock.Object);
+            _accountRepositoryMock.Setup(repository => repository
+                    .GetAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(new Account() { IsActive = true, Money = 10 });
 
+            _accountRepositoryMock.Setup(repository => repository
+                    .AddMoneyAsync(It.IsAny<int>(), It.IsAny<decimal>(), CancellationToken.None))
+                .Throws<Exception>();
+
+            //ACT
+
+            //ASSERT
+
+            await Assert.ThrowsAsync<Exception>(() => _accountService
+                .AddMoneyAsync(1, 1, CancellationToken.None));
+
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task AddMoney_WithValidAccount_ShouldCallSaveChangesOnce()
+        {
+            //ARRANGE
+            _accountRepositoryMock.Setup(repository => repository
+                    .GetAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(new Account() { IsActive = true, Money = 10 });
+
+            //ACT
+            await _accountService.AddMoneyAsync(1, 1, CancellationToken.None);
+
+            //ASSERT
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateAccount_WithInvalidCurrency_ShouldThrowException()
+        {
+            //ARRANGE
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                _accountService.CreateAsync(1, "", CancellationToken.None));
+        }
+
+        [Fact]
+        public async Task CreateAccount_WithInvalidCurrency_ShouldNotCallCreate()
+        {
+            //ARRANGE
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CreateAsync(1, "1", CancellationToken.None));
+
+            _accountRepositoryMock.Verify(repository => repository
+                .Create(1, It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task CreateAccount_WithInvalidUserId_ShouldThrowException()
+        {
+            //ARRANGE
+            const string validCurrency = "1";
+
+            _currencyToolMock.Setup(tool => tool.Validate(It.IsAny<string>()))
+                .Returns(validCurrency);
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                _accountService.CreateAsync(1, "", CancellationToken.None));
+        }
+
+        [Fact]
+        public async Task CreateAccount_WithInvalidUserId_ShouldNotCallCreate()
+        {
+            //ARRANGE
+            const string validCurrency = "1";
+
+            _currencyToolMock.Setup(tool => tool.Validate(It.IsAny<string>()))
+                .Returns(validCurrency);
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .CreateAsync(1, "", CancellationToken.None));
+
+            _accountRepositoryMock.Verify(repository => repository
+                .Create(1, It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task CreateAccount_ErrorWithCreation_ShouldNotCallSaveChangesAsync()
+        {
+            //ARRANGE
             const string validCurrency = "currency";
 
-            accountRepositoryMock.Setup(repository => repository
+            _currencyToolMock.Setup(tool => tool.Validate(It.IsAny<string>()))
+                .Returns(validCurrency);
+
+            _userRepositoryMock.Setup(repository => repository
+                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(true);
+
+            _accountRepositoryMock.Setup(repository => repository
                     .Create(It.IsAny<int>(), It.IsAny<string>()))
-                .Throws(new Exception());
-
-            currencyToolMock.Setup(tool => tool.Validate(It.IsAny<string>()))
-                .Returns(validCurrency);
+                .Throws<Exception>();
 
             //ACT
 
             //ASSERT
-            Assert.Throws<Exception>(() =>
-                accountService.CreateAsync(1, "", CancellationToken.None)
-                    .GetAwaiter()
-                    .GetResult());
+            await Assert.ThrowsAsync<Exception>(() => _accountService
+                .CreateAsync(1, "", CancellationToken.None));
+
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
-        public void CreateAccount_WithValidCurrencyAndUserId_ShouldCallSaveChangesOnce()
+        public async Task CreateAccount_WithValidCurrencyAndUserId_ShouldCallSaveChangesOnce()
         {
             //ARRANGE
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var currencyToolMock = new Mock<ICurrencyTool>();
-            var accountService = new AccountService(
-                new Mock<IAccountRepository>().Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object,
-                currencyToolMock.Object);
-
             const string validCurrency = "currency";
 
-            currencyToolMock.Setup(tool => tool.Validate(It.IsAny<string>()))
+            _currencyToolMock.Setup(tool => tool.Validate(It.IsAny<string>()))
                 .Returns(validCurrency);
 
+            _userRepositoryMock.Setup(repository => repository
+                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(true);
+
             //ACT
-            accountService.CreateAsync(1, "", CancellationToken.None)
-                .GetAwaiter()
-                .GetResult();
+            await _accountService.CreateAsync(1, "", CancellationToken.None);
 
             //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
         }
 
         [Fact]
-        public void DoTransfer_WithExceptionOnBeginTransaction_ShouldNotCallDisposeTransaction()
+        public async Task DoTransfer_WithExceptionOnBeginTransaction_ShouldNotCallDisposeTransaction()
         {
             //ARRANGE
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var accountService = new AccountService(
-                new Mock<IAccountRepository>().Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object,
-                new Mock<ICurrencyTool>().Object);
-
-            unitOfWorkMock
+            _unitOfWorkMock
                 .Setup(unitOfWork => unitOfWork.BeginTransactionAsync())
-                .Throws(new Exception());
+                .Throws<Exception>();
 
             //ACT
-            try
-            {
-                accountService.DoTransferAsync(1, 1, 2, CancellationToken.None)
-                    .GetAwaiter()
-                    .GetResult();
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.DisposeTransactionAsync(), Times.Never);
+            await Assert.ThrowsAsync<Exception>(() => _accountService
+                .DoTransferAsync(1, 1, 2, CancellationToken.None));
+
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.DisposeTransactionAsync(), Times.Never);
         }
 
         [Fact]
-        public void DoTransfer_WithExceptionWhileDoingTransaction_ShouldCallDisposeTransactionOnce()
+        public async Task DoTransfer_WithExceptionWhileDoingTransaction_ShouldCallDisposeTransactionOnce()
         {
             //ARRANGE
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var accountService = new AccountService(
-                new Mock<IAccountRepository>().Object,
-                new Mock<ITransferRepository>().Object,
-                new Mock<ICurrencyConverter>().Object,
-                unitOfWorkMock.Object,
-                new Mock<ICurrencyTool>().Object);
 
             //ACT
-            try
-            {
-                accountService.DoTransferAsync(1, 1, 2, CancellationToken.None)
-                    .GetAwaiter()
-                    .GetResult();
-            }
-            catch
-            {
-                //
-            }
 
             //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.DisposeTransactionAsync(), Times.Once);
+            await Assert.ThrowsAsync<ValidationException>(() => _accountService
+                .DoTransferAsync(1, 1, 2, CancellationToken.None));
+
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.DisposeTransactionAsync(), Times.Once);
         }
 
         [Fact]
-        public void DoTransfer_Correct_ShouldCallDisposeTransactionOnce()
+        public async Task DoTransfer_Correct_ShouldCallDisposeTransactionOnce()
         {
             //ARRANGE
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var currencyConverterMock = new Mock<ICurrencyConverter>();
-            var accountService = new AccountService(
-                accountRepositoryMock.Object,
-                new Mock<ITransferRepository>().Object,
-                currencyConverterMock.Object,
-                unitOfWorkMock.Object,
-                new Mock<ICurrencyTool>().Object);
-
             const decimal fromAccountMoney = 1;
             var fromAccount = new Account() {Id = 1, Money = fromAccountMoney, IsActive = true, UserId = 1};
             var toAccount = new Account() {Id = 2, Money = 1, IsActive = true, UserId = 1};
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(fromAccount.Id, CancellationToken.None))
-                .Returns(Task.FromResult(fromAccount));
+                .ReturnsAsync(fromAccount);
 
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .GetAsync(toAccount.Id, CancellationToken.None))
-                .Returns(Task.FromResult(toAccount));
+                .ReturnsAsync(toAccount);
 
-            currencyConverterMock.Setup(converter => converter
+            _currencyConverterMock.Setup(converter => converter
                     .ConvertAsync(
                         fromAccountMoney, 
                         It.IsAny<string>(), 
                         It.IsAny<string>(), 
                         CancellationToken.None))
-                .Returns(Task.FromResult(fromAccountMoney));
+                .ReturnsAsync(fromAccountMoney);
 
             //ACT
-            try
-            {
-                accountService.DoTransferAsync(
-                        fromAccountMoney, 
-                        fromAccount.Id, 
-                        toAccount.Id, 
-                        CancellationToken.None)
-                    .GetAwaiter()
-                    .GetResult();
-            }
-            catch
-            {
-                //
-            }
+            await _accountService.DoTransferAsync(
+                    fromAccountMoney, 
+                    fromAccount.Id, 
+                    toAccount.Id, 
+                    CancellationToken.None);
 
             //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.DisposeTransactionAsync(), Times.Once);
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.DisposeTransactionAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task DoTransfer_Correct_ShouldCallAddMoneyTwice()
+        {
+            //ARRANGE
+            const decimal fromAccountMoney = 1;
+            var fromAccount = new Account() { Id = 1, Money = fromAccountMoney, IsActive = true, UserId = 1 };
+            var toAccount = new Account() { Id = 2, Money = 1, IsActive = true, UserId = 1 };
+
+            _accountRepositoryMock.Setup(repository => repository
+                    .GetAsync(fromAccount.Id, CancellationToken.None))
+                .ReturnsAsync(fromAccount);
+
+            _accountRepositoryMock.Setup(repository => repository
+                    .GetAsync(toAccount.Id, CancellationToken.None))
+                .ReturnsAsync(toAccount);
+
+            _currencyConverterMock.Setup(converter => converter
+                    .ConvertAsync(
+                        fromAccountMoney,
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        CancellationToken.None))
+                .ReturnsAsync(fromAccountMoney);
+
+            //ACT
+            await _accountService.DoTransferAsync(
+                    fromAccountMoney,
+                    fromAccount.Id,
+                    toAccount.Id,
+                    CancellationToken.None);
+
+            //ASSERT
+            _accountRepositoryMock.Verify(repository => repository
+                .AddMoneyAsync(It.IsAny<int>(), It.IsAny<decimal>(), CancellationToken.None),
+                Times.Exactly(2));
+        }
+
+        [Fact]
+        public async Task DoTransfer_Correct_ShouldCallSaveChangesAsyncThreeTimes()
+        {
+            //ARRANGE
+            const decimal fromAccountMoney = 1;
+            var fromAccount = new Account() { Id = 1, Money = fromAccountMoney, IsActive = true, UserId = 1 };
+            var toAccount = new Account() { Id = 2, Money = 1, IsActive = true, UserId = 1 };
+
+            _accountRepositoryMock.Setup(repository => repository
+                    .GetAsync(fromAccount.Id, CancellationToken.None))
+                .ReturnsAsync(fromAccount);
+
+            _accountRepositoryMock.Setup(repository => repository
+                    .GetAsync(toAccount.Id, CancellationToken.None))
+                .ReturnsAsync(toAccount);
+
+            _currencyConverterMock.Setup(converter => converter
+                    .ConvertAsync(
+                        fromAccountMoney,
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        CancellationToken.None))
+                .ReturnsAsync(fromAccountMoney);
+
+            //ACT
+            await _accountService.DoTransferAsync(
+                    fromAccountMoney,
+                    fromAccount.Id,
+                    toAccount.Id,
+                    CancellationToken.None);
+
+            //ASSERT
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Exactly(3));
+        }
+
+        [Fact]
+        public async Task DoTransfer_Correct_ShouldCallCommitTransactionOnce()
+        {
+            //ARRANGE
+            const decimal fromAccountMoney = 1;
+            var fromAccount = new Account() { Id = 1, Money = fromAccountMoney, IsActive = true, UserId = 1 };
+            var toAccount = new Account() { Id = 2, Money = 1, IsActive = true, UserId = 1 };
+
+            _accountRepositoryMock.Setup(repository => repository
+                    .GetAsync(fromAccount.Id, CancellationToken.None))
+                .ReturnsAsync(fromAccount);
+
+            _accountRepositoryMock.Setup(repository => repository
+                    .GetAsync(toAccount.Id, CancellationToken.None))
+                .ReturnsAsync(toAccount);
+
+            _currencyConverterMock.Setup(converter => converter
+                    .ConvertAsync(
+                        fromAccountMoney,
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        CancellationToken.None))
+                .ReturnsAsync(fromAccountMoney);
+
+            //ACT
+            await _accountService.DoTransferAsync(
+                    fromAccountMoney,
+                    fromAccount.Id,
+                    toAccount.Id,
+                    CancellationToken.None);
+
+            //ASSERT
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.CommitTransactionAsync(), Times.Once);
         }
     }
 }

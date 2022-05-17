@@ -4,15 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Minibank.Core.Domains.Accounts.Repositories;
 using Minibank.Core.Domains.Users;
 using Minibank.Core.Domains.Users.Repositories;
 using Minibank.Core.Domains.Users.Services;
 using Minibank.Core.Domains.Users.Validators;
-using Minibank.Data;
-using Minibank.Data.Accounts.Repositories;
-using Minibank.Data.Users.Repositories;
 using Moq;
 using Xunit;
 using ValidationException = Minibank.Core.Exceptions.ValidationException;
@@ -21,262 +17,310 @@ namespace Minibank.Core.Tests
 {
     public class UserServiceTests
     {
+        private readonly Mock<IUserRepository> _userRepositoryMock;
+        private readonly Mock<IAccountRepository> _accountRepositoryMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+        private readonly IValidator<User> _validator;
+        private readonly IUserService _userService;
+
+        public UserServiceTests()
+        {
+            _userRepositoryMock = new Mock<IUserRepository>();
+            _accountRepositoryMock = new Mock<IAccountRepository>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
+            _validator = new UserValidator();
+
+            _userService = new UserService(
+                _userRepositoryMock.Object,
+                _accountRepositoryMock.Object,
+                _unitOfWorkMock.Object,
+                _validator);
+        }
+
         [Fact]
-        public void CreateUser_WithNullLogin_ShouldThrowException()
+        public async Task CreateUser_WithNullData_ShouldThrowException()
         {
             //ARRANGE
-            var userValidator = new UserValidator();
-            var userService = new UserService(
-                new Mock<IUserRepository>().Object,
-                new Mock<IAccountRepository>().Object,
-                new Mock<IUnitOfWork>().Object,
-                userValidator);
 
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                _userService.CreateAsync(null, CancellationToken.None));
+        }
+
+        [Fact]
+        public async Task CreateUser_WithNullLogin_ShouldThrowException()
+        {
+            //ARRANGE
             var data = new User { Email = "1" };
 
             //ACT
 
             //ASSERT
-            Assert.Throws<FluentValidation.ValidationException>(() =>
-                userService.CreateAsync(data, CancellationToken.None).GetAwaiter().GetResult());
+            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                _userService.CreateAsync(data, CancellationToken.None));
         }
 
         [Fact]
-        public void CreateUser_WithNullEmail_ShouldThrowException()
+        public async Task CreateUser_WithNullEmail_ShouldThrowException()
         {
             //ARRANGE
-            var userValidator = new UserValidator();
-            var userService = new UserService(
-                new Mock<IUserRepository>().Object,
-                new Mock<IAccountRepository>().Object,
-                new Mock<IUnitOfWork>().Object,
-                userValidator);
-
             var data = new User { Login = "1" };
 
             //ACT
 
             //ASSERT
-            Assert.Throws<FluentValidation.ValidationException>(() =>
-                userService.CreateAsync(data, CancellationToken.None).GetAwaiter().GetResult());
+            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                _userService.CreateAsync(data, CancellationToken.None));
         }
 
         [Fact]
-        public void CreateUser_WithNullEmailAndLogin_ShouldThrowException()
+        public async Task CreateUser_WithNullEmailAndLogin_ShouldThrowException()
         {
             //ARRANGE
-            var userValidator = new UserValidator();
-            var userService = new UserService(
-                new Mock<IUserRepository>().Object,
-                new Mock<IAccountRepository>().Object,
-                new Mock<IUnitOfWork>().Object,
-                userValidator);
-
             var data = new User();
 
             //ACT
 
             //ASSERT
-            Assert.Throws<FluentValidation.ValidationException>(() =>
-                userService.CreateAsync(data, CancellationToken.None).GetAwaiter().GetResult());
+            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+                _userService.CreateAsync(data, CancellationToken.None));
         }
 
         [Fact]
-        public void CreateUser_WithNullData_ShouldThrowException()
+        public async Task CreateUser_WithInvalidData_ShouldNotCallCreate()
         {
             //ARRANGE
-            var userValidator = new UserValidator();
-            var userService = new UserService(
-                new Mock<IUserRepository>().Object,
-                new Mock<IAccountRepository>().Object,
-                new Mock<IUnitOfWork>().Object,
-                userValidator);
+            var data = new User();
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() =>
-                userService.CreateAsync(null, CancellationToken.None).GetAwaiter().GetResult());
+            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _userService
+                .CreateAsync(data, CancellationToken.None));
+
+            _userRepositoryMock.Verify(repository => repository.Create(data), Times.Never);
         }
 
         [Fact]
-        public void CreateUser_WithValidData_ShouldCallSaveChangesOnce()
+        public async Task CreateUser_ErrorWithCreation_ShouldNotCallSaveChanges()
         {
             //ARRANGE
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var userService = new UserService(
-                new Mock<IUserRepository>().Object,
-                new Mock<IAccountRepository>().Object,
-                unitOfWorkMock.Object,
-                new Mock<IValidator<User>>().Object);
+            var data = new User() {Email = "1", Login = "1"};
+
+            _userRepositoryMock.Setup(repository => repository.Create(data)).Throws<Exception>();
 
             //ACT
-            userService.CreateAsync(new User(), CancellationToken.None)
-                .GetAwaiter()
-                .GetResult();
 
             //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
+            await Assert.ThrowsAsync<Exception>(() => _userService
+                .CreateAsync(data, CancellationToken.None));
+
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
-        public void GetUser_WithValidId_ShouldReturnUserWithValidId()
+        public async Task CreateUser_WithValidData_ShouldCallSaveChangesOnce()
         {
             //ARRANGE
-            var userRepositoryMock = new Mock<IUserRepository>();
-            var userService = new UserService(
-                userRepositoryMock.Object,
-                new Mock<IAccountRepository>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<IValidator<User>>().Object);
+
+            //ACT
+            await _userService.CreateAsync(new User() {Email = "1", Login = "1"}, CancellationToken.None);
+
+            //ASSERT
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetUser_WithValidId_ShouldReturnUserWithValidId()
+        {
+            //ARRANGE
 
             const int validId = 585;
             var validUser = new User { Id = validId };
 
-            userRepositoryMock
+            _userRepositoryMock
                 .Setup(repository => repository
                     .GetAsync(validId, CancellationToken.None))
-                .Returns(Task.FromResult(validUser));
+                .ReturnsAsync(validUser);
 
             //ACT
-            var user = userService.GetAsync(validId, CancellationToken.None).GetAwaiter().GetResult();
+            var user = await _userService.GetAsync(validId, CancellationToken.None);
 
             //ASSERT
             Assert.Equal(validId, user.Id);
         }
 
         [Fact]
-        public void GetUser_WithInvalidId_ShouldThrowException()
+        public async Task GetUser_WithInvalidId_ShouldThrowException()
         {
             //ARRANGE
-            var userService = new UserService(
-                new Mock<IUserRepository>().Object,
-                new Mock<IAccountRepository>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<IValidator<User>>().Object);
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() => 
-                userService.GetAsync(1, CancellationToken.None).GetAwaiter().GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() => 
+                _userService.GetAsync(1, CancellationToken.None));
         }
 
         [Fact]
-        public void DeleteUser_UserNotExists_ShouldNotCallSaveChangesAsync()
+        public async Task DeleteUser_WithActiveAccounts_ShouldThrowException()
         {
             //ARRANGE
-            var userRepositoryMock = new Mock<IUserRepository>();
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var userService = new UserService(
-                userRepositoryMock.Object,
-                new Mock<IAccountRepository>().Object,
-                unitOfWorkMock.Object,
-                new Mock<IValidator<User>>().Object);
-
-            userRepositoryMock.Setup(repository => repository
-                .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(false));
-
-            //ACT
-            userService.DeleteAsync(1, CancellationToken.None).GetAwaiter().GetResult();
-
-            //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
-        }
-
-        [Fact]
-        public void DeleteUser_WithActiveAccounts_ShouldThrowException()
-        {
-            //ARRANGE
-            var accountRepositoryMock = new Mock<IAccountRepository>();
-            var userService = new UserService(
-                new Mock<IUserRepository>().Object,
-                accountRepositoryMock.Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<IValidator<User>>().Object);
-
-            accountRepositoryMock.Setup(repository => repository
+            _accountRepositoryMock.Setup(repository => repository
                     .IsActiveWithUserAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync(true);
 
             //ACT
 
             //ASSERT
-            Assert.Throws<ValidationException>(() =>
-                userService.DeleteAsync(1, CancellationToken.None).GetAwaiter().GetResult());
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                _userService.DeleteAsync(1, CancellationToken.None));
         }
 
         [Fact]
-        public void DeleteUser_WithValidId_ShouldCallSaveChangesOnce()
+        public async Task DeleteUser_WithActiveAccounts_ShouldNotCallDeleteAsync()
         {
             //ARRANGE
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var userRepositoryMock = new Mock<IUserRepository>();
-            var userService = new UserService(
-                userRepositoryMock.Object,
-                new Mock<IAccountRepository>().Object,
-                unitOfWorkMock.Object,
-                new Mock<IValidator<User>>().Object);
-
-            userRepositoryMock.Setup(repository => repository
-                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(true));
+            _accountRepositoryMock.Setup(repository => repository
+                    .IsActiveWithUserAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(true);
 
             //ACT
-            userService.DeleteAsync(1, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult();
 
             //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
+            await Assert.ThrowsAsync<ValidationException>(() => _userService
+                .DeleteAsync(1, CancellationToken.None));
+
+            _userRepositoryMock
+                .Verify(repository => repository.DeleteAsync(1, CancellationToken.None), Times.Never);
         }
 
         [Fact]
-        public void UpdateUser_UserNotExists_ShouldThrowException()
+        public async Task DeleteUser_NotActiveAccountsOrNotExists_ShouldCallExistsAsync()
         {
             //ARRANGE
-            var userRepositoryMock = new Mock<IUserRepository>();
-            var userService = new UserService(
-                userRepositoryMock.Object,
-                new Mock<IAccountRepository>().Object,
-                new Mock<IUnitOfWork>().Object,
-                new Mock<IValidator<User>>().Object);
-
-            userRepositoryMock.Setup(repository => repository
-                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(false));
 
             //ACT
+            await _userService.DeleteAsync(1, CancellationToken.None);
 
             //ASSERT
-            Assert.Throws<ValidationException>(() =>
-                userService.UpdateAsync(1, new User(), CancellationToken.None).GetAwaiter().GetResult());
+            _userRepositoryMock
+                .Verify(repository => repository.ExistsAsync(1, CancellationToken.None), Times.Once);
         }
 
         [Fact]
-        public void UpdateUser_WithValidId_ShouldCallSaveChangesOnce()
+        public async Task DeleteUser_UserNotExists_ShouldNotCallDeleteAsync()
         {
             //ARRANGE
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var userRepositoryMock = new Mock<IUserRepository>();
-            var userService = new UserService(
-                userRepositoryMock.Object,
-                new Mock<IAccountRepository>().Object,
-                unitOfWorkMock.Object,
-                new Mock<IValidator<User>>().Object);
-
-            userRepositoryMock.Setup(repository => repository
-                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
-                .Returns(Task.FromResult(true));
 
             //ACT
-            userService.UpdateAsync(1, null, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult();
+            await _userService.DeleteAsync(1, CancellationToken.None);
 
             //ASSERT
-            unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
+            _userRepositoryMock
+                .Verify(repository => repository.DeleteAsync(1, CancellationToken.None), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteUser_ErrorWithDeleting_ShouldNotCallSaveChangesAsync()
+        {
+            //ARRANGE
+            _userRepositoryMock.Setup(repository => repository
+                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(true);
+
+            _userRepositoryMock.Setup(repository => repository
+                    .DeleteAsync(It.IsAny<int>(), CancellationToken.None))
+                .Throws<Exception>();
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<Exception>(() => _userService
+                .DeleteAsync(1, CancellationToken.None));
+
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteUser_WithValidId_ShouldCallSaveChangesOnce()
+        {
+            //ARRANGE
+            _userRepositoryMock.Setup(repository => repository
+                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(true);
+
+            //ACT
+            await _userService.DeleteAsync(1, CancellationToken.None);
+
+            //ASSERT
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateUser_UserNotExists_ShouldThrowException()
+        {
+            //ARRANGE
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                _userService.UpdateAsync(1, new User(), CancellationToken.None));
+        }
+
+        [Fact]
+        public async Task UpdateUser_UserNotExists_ShouldNotCallUpdateAsync()
+        {
+            //ARRANGE
+            var user = new User();
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<ValidationException>(() => _userService
+                .UpdateAsync(1, user, CancellationToken.None));
+
+            _userRepositoryMock.Verify(repository => repository
+                .UpdateAsync(1, user, CancellationToken.None), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateUser_ErrorWithUpdating_ShouldCallSaveChangesOnce()
+        {
+            //ARRANGE
+            _userRepositoryMock.Setup(repository => repository
+                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(true);
+
+            _userRepositoryMock.Setup(repository => repository
+                    .UpdateAsync(It.IsAny<int>(), It.IsAny<User>(), CancellationToken.None))
+                .Throws<Exception>();
+
+            //ACT
+
+            //ASSERT
+            await Assert.ThrowsAsync<Exception>(() => _userService
+                .UpdateAsync(1, null, CancellationToken.None));
+
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateUser_WithValidId_ShouldCallSaveChangesOnce()
+        {
+            //ARRANGE
+            _userRepositoryMock.Setup(repository => repository
+                    .ExistsAsync(It.IsAny<int>(), CancellationToken.None))
+                .ReturnsAsync(true);
+
+            //ACT
+            await _userService.UpdateAsync(1, null, CancellationToken.None);
+
+            //ASSERT
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(), Times.Once);
         }
     }
 }
