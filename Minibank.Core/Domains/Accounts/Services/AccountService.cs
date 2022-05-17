@@ -9,6 +9,7 @@ using Minibank.Core.Helpers;
 using Minibank.Core.Domains.Accounts.Repositories;
 using Minibank.Core.Domains.Transfers;
 using Minibank.Core.Domains.Transfers.Repositories;
+using Minibank.Core.Domains.Users.Repositories;
 using Minibank.Core.Domains.Users.Services;
 using Minibank.Core.Exchanges;
 
@@ -20,16 +21,20 @@ namespace Minibank.Core.Domains.Accounts.Services
         private readonly ITransferRepository _transferRepository;
         private readonly ICurrencyConverter _currencyConverter;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrencyTool _currencyTool;
+        private readonly IUserRepository _userRepository;
 
         private const decimal CommissionMultiplier = 0.02m;
         private const int DecimalPlaces = 2;
 
-        public AccountService(IAccountRepository accountRepository, ITransferRepository transferRepository, ICurrencyConverter currencyConverter, IUnitOfWork unitOfWork)
+        public AccountService(IAccountRepository accountRepository, ITransferRepository transferRepository, ICurrencyConverter currencyConverter, IUnitOfWork unitOfWork, ICurrencyTool currencyTool, IUserRepository userRepository)
         {
             _accountRepository = accountRepository;
             _transferRepository = transferRepository;
             _currencyConverter = currencyConverter;
             _unitOfWork = unitOfWork;
+            _currencyTool = currencyTool;
+            _userRepository = userRepository;
         }
 
         public async Task<decimal> CalculateCommissionAsync(decimal amount, int fromAccountId, int toAccountId, CancellationToken cancellationToken)
@@ -107,11 +112,16 @@ namespace Minibank.Core.Domains.Accounts.Services
 
         public async Task CreateAsync(int userId, string currencyCode, CancellationToken cancellationToken)
         {
-            currencyCode = Currency.Validate(currencyCode);
+            currencyCode = _currencyTool.Validate(currencyCode);
 
             if (currencyCode == null)
             {
                 throw new ValidationException("invalid currency");
+            }
+
+            if (!await _userRepository.ExistsAsync(userId, CancellationToken.None))
+            {
+                throw new ValidationException("user not found");
             }
 
             _accountRepository.Create(userId, currencyCode);

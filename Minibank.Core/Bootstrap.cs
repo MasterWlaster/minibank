@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Minibank.Core.Domains.Accounts.Services;
 using Minibank.Core.Domains.Users.Services;
 using Minibank.Core.Exchanges;
+using Minibank.Core.Helpers;
 
 namespace Minibank.Core
 {
@@ -19,6 +20,7 @@ namespace Minibank.Core
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ICurrencyConverter, CurrencyConverter>();
+            services.AddScoped<ICurrencyTool, Currency>();
 
             services.AddFluentValidation().AddValidatorsFromAssembly(typeof(Bootstrap).Assembly);
 

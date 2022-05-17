@@ -18,16 +18,21 @@ namespace Minibank.Core.Domains.Users.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<User> _userValidator;
 
-        public UserService(IUserRepository userRepository, IAccountRepository accountService, IUnitOfWork unitOfWork, IValidator<User> userValidator)
+        public UserService(IUserRepository userRepository, IAccountRepository accountRepository, IUnitOfWork unitOfWork, IValidator<User> userValidator)
         {
             _userRepository = userRepository;
-            _accountRepository = accountService;
+            _accountRepository = accountRepository;
             _unitOfWork = unitOfWork;
             _userValidator = userValidator;
         }
 
         public async Task CreateAsync(User data, CancellationToken cancellationToken)
         {
+            if (data == null)
+            {
+                throw new ValidationException("can not create from empty data");
+            }
+            
             await _userValidator.ValidateAndThrowAsync(data, cancellationToken);
             
             _userRepository.Create(data);
@@ -37,14 +42,14 @@ namespace Minibank.Core.Domains.Users.Services
 
         public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            if (!await _userRepository.ExistsAsync(id, cancellationToken))
-            {
-                return;
-            }
-
             if (await _accountRepository.IsActiveWithUserAsync(id, cancellationToken))
             {
                 throw new ValidationException("user has active accounts");
+            }
+
+            if (!await _userRepository.ExistsAsync(id, cancellationToken))
+            {
+                return;
             }
 
             await _userRepository.DeleteAsync(id, cancellationToken);
