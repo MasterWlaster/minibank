@@ -28,7 +28,7 @@ namespace Minibank.Data.Exchanges
 
         public async Task<decimal> GetRateAsync(string currencyCode, CancellationToken cancellationToken)
         {
-            return await GetRateFromJsonAsync(currencyCode.Trim().ToUpper(), cancellationToken);
+            return await GetRateFromJsonAsync(_currencyTool.Normalize(currencyCode), cancellationToken);
         }
 
         private async Task<decimal> GetRateFromJsonAsync(string currencyCode, CancellationToken cancellationToken)
