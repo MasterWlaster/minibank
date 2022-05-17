@@ -11,7 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minibank.Data", "Minibank.D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DF794CF3-695B-4DFA-B236-8E9E97911F97}"
 EndProject
+<<<<<<< HEAD:src/Minibank.sln
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minibank.Core.Tests", "Tests\Minibank.Core.Tests\Minibank.Core.Tests.csproj", "{367D016F-9E96-4D62-80E2-973474C7694F}"
+=======
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minibank.Core.Tests", "Tests\Minibank.Core.Tests\Minibank.Core.Tests.csproj", "{63EE30B0-CF00-4ED3-9AA9-5FF964EE526E}"
+>>>>>>> homework_5:Minibank.sln
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,16 +35,27 @@ Global
 		{BF108283-FB4C-4035-AC22-C6C9952D6650}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF108283-FB4C-4035-AC22-C6C9952D6650}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF108283-FB4C-4035-AC22-C6C9952D6650}.Release|Any CPU.Build.0 = Release|Any CPU
+<<<<<<< HEAD:src/Minibank.sln
 		{367D016F-9E96-4D62-80E2-973474C7694F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{367D016F-9E96-4D62-80E2-973474C7694F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{367D016F-9E96-4D62-80E2-973474C7694F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{367D016F-9E96-4D62-80E2-973474C7694F}.Release|Any CPU.Build.0 = Release|Any CPU
+=======
+		{63EE30B0-CF00-4ED3-9AA9-5FF964EE526E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63EE30B0-CF00-4ED3-9AA9-5FF964EE526E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63EE30B0-CF00-4ED3-9AA9-5FF964EE526E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63EE30B0-CF00-4ED3-9AA9-5FF964EE526E}.Release|Any CPU.Build.0 = Release|Any CPU
+>>>>>>> homework_5:Minibank.sln
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+<<<<<<< HEAD:src/Minibank.sln
 		{367D016F-9E96-4D62-80E2-973474C7694F} = {DF794CF3-695B-4DFA-B236-8E9E97911F97}
+=======
+		{63EE30B0-CF00-4ED3-9AA9-5FF964EE526E} = {DF794CF3-695B-4DFA-B236-8E9E97911F97}
+>>>>>>> homework_5:Minibank.sln
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8AFB244D-8C30-466B-8FD6-5021298AB8D3}
