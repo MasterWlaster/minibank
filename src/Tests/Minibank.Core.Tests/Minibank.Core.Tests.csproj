@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Minibank.Data\Minibank.Data.csproj" />
+    <ProjectReference Include="..\..\Minibank.Data\Minibank.Data.csproj" />
   </ItemGroup>
 
 </Project>
