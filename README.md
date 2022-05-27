@@ -1,2 +1,1 @@
 # MiniBank
-## Author - Nikitin Kirill
